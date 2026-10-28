@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101820">
+  <title>Histograma de boxeo</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f2e9;
+      background: #101820;
+      --muted: #aab5bb;
+      --panel: #1a2730;
+      --gold: #f2c66d;
+      --red: #e34d46;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: grid;
+      min-height: 100vh;
+      margin: 0;
+      place-items: center;
+      padding: 28px 16px;
+      background:
+        radial-gradient(ellipse at 50% 0, #28404a 0, transparent 55%),
+        linear-gradient(145deg, #101820, #17242a 58%, #101820);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      width: min(100%, 760px);
+    }
+
+    .heading {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .heading .gloves {
+      font-size: 2.4rem;
+    }
+
+    h1 {
+      margin: 4px 0;
+      font-size: clamp(1.7rem, 5vw, 2.5rem);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .heading p,
+    .hint {
+      color: var(--muted);
+    }
+
+    .panel {
+      padding: clamp(18px, 4vw, 30px);
+      background: linear-gradient(145deg, #1d2b34, #172229);
+      border: 1px solid #ffffff16;
+      border-radius: 22px;
+      box-shadow: 0 24px 70px #0006;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .hint {
+      margin: 0 0 12px;
+      font-size: 0.9rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      min-width: 0;
+      flex: 1;
+      padding: 12px 14px;
+      color: #f5f2e9;
+      background: #10191f;
+      border: 1px solid #ffffff25;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px #f2c66d24;
+    }
+
+    button {
+      padding: 12px 18px;
+      color: #151b1c;
+      background: var(--gold);
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    button:hover {
+      background: #ffda83;
+    }
+
+    button:focus-visible {
+      outline: 3px solid white;
+      outline-offset: 3px;
+    }
+
+    .error {
+      min-height: 1.4em;
+      margin: 8px 0 0;
+      color: #ff9690;
+      font-size: 0.9rem;
+    }
+
+    .ring {
+      position: relative;
+      margin-top: 12px;
+      padding: 30px clamp(14px, 5vw, 42px);
+      background:
+        linear-gradient(0deg, transparent 0 18%, #e34d46 18% 20%, transparent 20% 38%, #f5f2e9 38% 40%, transparent 40% 60%, #e34d46 60% 62%, transparent 62% 80%, #f5f2e9 80% 82%, transparent 82%),
+        linear-gradient(145deg, #344951, #22343b);
+      border: 8px solid #d7dce0;
+      border-radius: 15px;
+      box-shadow: inset 0 0 0 5px #15232a, 0 10px 25px #0004;
+    }
+
+    .ring::before,
+    .ring::after {
+      position: absolute;
+      top: -19px;
+      bottom: -19px;
+      width: 8px;
+      content: "";
+      background: linear-gradient(#f2c66d, #c58d30);
+      border-radius: 8px;
+    }
+
+    .ring::before {
+      left: 12%;
+    }
+
+    .ring::after {
+      right: 12%;
+    }
+
+    .chart-title {
+      margin: 0 0 22px;
+      text-align: center;
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .bars {
+      display: grid;
+      gap: 15px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) 30px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .category {
+      color: var(--gold);
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .track {
+      height: 22px;
+      overflow: hidden;
+      background: #10191f99;
+      border: 1px solid #ffffff20;
+      border-radius: 6px;
+    }
+
+    .bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #e34d46, #ff795d);
+      border-radius: 5px;
+      transition: width 350ms ease;
+    }
+
+    .frequency {
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+    }
+
+    .summary {
+      margin: 20px 0 0;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .summary strong {
+      color: var(--gold);
+    }
+
+    @media (max-width: 520px) {
+      .input-row {
+        flex-direction: column;
+      }
+
+      .ring {
+        padding-right: 12px;
+        padding-left: 12px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="heading">
+      <div class="gloves" aria-hidden="true">🥊</div>
+      <h1>Histograma de boxeo</h1>
+      <p>¡Sube al ring y cuenta tus resultados!</p>
+    </header>
+
+    <section class="panel" aria-label="Generador de histograma">
+      <form id="histogram-form" novalidate>
+        <label for="numbers">Ingresa 10 números del 1 al 5</label>
+        <p class="hint">Sepáralos con comas o espacios. Ejemplo: 1, 2, 3, 4, 5, 1, 2, 3, 4, 5</p>
+        <div class="input-row">
+          <input id="numbers" name="numbers" type="text" autocomplete="off" placeholder="1, 2, 3, 4, 5, 1, 2, 3, 4, 5" aria-describedby="input-error">
+          <button type="submit">Generar histograma</button>
+        </div>
+        <p class="error" id="input-error" role="alert"></p>
+      </form>
+
+      <div class="ring">
+        <h2 class="chart-title">Frecuencias del combate</h2>
+        <div class="bars" id="bars" role="img" aria-label="Histograma sin datos">
+          <div class="bar-row" data-value="1"><span class="category">1</span><div class="track"><div class="bar"></div></div><span class="frequency">0</span></div>
+          <div class="bar-row" data-value="2"><span class="category">2</span><div class="track"><div class="bar"></div></div><span class="frequency">0</span></div>
+          <div class="bar-row" data-value="3"><span class="category">3</span><div class="track"><div class="bar"></div></div><span class="frequency">0</span></div>
+          <div class="bar-row" data-value="4"><span class="category">4</span><div class="track"><div class="bar"></div></div><span class="frequency">0</span></div>
+          <div class="bar-row" data-value="5"><span class="category">5</span><div class="track"><div class="bar"></div></div><span class="frequency">0</span></div>
+        </div>
+        <p class="summary" id="summary" aria-live="polite">Aún no hay datos en el ring.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.querySelector("#histogram-form");
+    const input = document.querySelector("#numbers");
+    const error = document.querySelector("#input-error");
+    const bars = document.querySelector("#bars");
+    const summary = document.querySelector("#summary");
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const rawValues = input.value.trim().split(/[\s,;]+/).filter(Boolean);
+      const values = rawValues.map(Number);
+
+      if (values.length !== 10 || values.some((value) => !Number.isInteger(value) || value < 1 || value > 5)) {
+        error.textContent = "Ingresa exactamente 10 números enteros entre 1 y 5.";
+        return;
+      }
+
+      error.textContent = "";
+      const frequencies = [0, 0, 0, 0, 0];
+      values.forEach((value) => frequencies[value - 1]++);
+
+      bars.querySelectorAll(".bar-row").forEach((row) => {
+        const frequency = frequencies[Number(row.dataset.value) - 1];
+        row.querySelector(".bar").style.width = `${frequency * 10}%`;
+        row.querySelector(".frequency").textContent = frequency;
+      });
+
+      bars.setAttribute("aria-label", `Histograma actualizado: ${frequencies.map((count, index) => `${index + 1}: ${count}`).join(", ")}`);
+      summary.innerHTML = `Datos registrados: <strong>${values.length}</strong> &nbsp;·&nbsp; Asaltos completados: <strong>${values.length}</strong>`;
+    });
+  </script>
+</body>
+</html>
