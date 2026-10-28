@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11131b">
+  <meta name="description" content="Valida cédulas ecuatorianas en tu navegador y juega Rescate en la torre, un minijuego arcade original.">
+  <title>Misión Cédula · Validador ecuatoriano</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f4ef;
+      background: #11131b;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --muted: #a5a6b2;
+      --panel: #1b1d29;
+      --border: #ffffff16;
+      --lime: #cbf36b;
+      --orange: #ff9b54;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 34px 20px;
+      background:
+        radial-gradient(ellipse at 12% 4%, #38335580, transparent 34%),
+        radial-gradient(ellipse at 92% 84%, #394c2c55, transparent 35%),
+        #11131b;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    .app {
+      width: min(100%, 1120px);
+      margin: 0 auto;
+    }
+
+    .topbar,
+    .brand,
+    .eyebrow,
+    .section-heading,
+    .game-stats,
+    .game-controls,
+    .field-actions {
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar,
+    .section-heading {
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar {
+      margin-bottom: 30px;
+    }
+
+    .brand {
+      gap: 12px;
+    }
+
+    .brand-icon {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      color: #171a12;
+      font-size: 1.35rem;
+      background: var(--lime);
+      border-radius: 14px;
+      box-shadow: 0 0 28px #cbf36b30;
+    }
+
+    .brand-name {
+      margin: 0;
+      font-size: 1.08rem;
+      font-weight: 850;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-caption {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .local-badge {
+      padding: 8px 12px;
+      color: #d7e9b5;
+      font-size: 0.78rem;
+      border: 1px solid #cbf36b35;
+      border-radius: 999px;
+      background: #cbf36b0c;
+    }
+
+    .hero {
+      margin: 0 0 26px;
+    }
+
+    .eyebrow {
+      gap: 8px;
+      margin: 0 0 10px;
+      color: var(--lime);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      max-width: 700px;
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.65rem);
+      line-height: 1.02;
+      letter-spacing: -0.06em;
+    }
+
+    .hero h1 span {
+      color: var(--lime);
+    }
+
+    .hero-copy {
+      max-width: 650px;
+      margin: 13px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(290px, 0.86fr) minmax(390px, 1.14fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .panel {
+      min-width: 0;
+      padding: clamp(20px, 3vw, 30px);
+      background: linear-gradient(145deg, #20222f, #191b25);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 22px 65px #0003;
+    }
+
+    .section-heading {
+      justify-content: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .section-icon {
+      display: grid;
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      color: var(--lime);
+      background: #cbf36b14;
+      border-radius: 13px;
+      font-size: 1.25rem;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 1.08rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section-heading p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.83rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 9px;
+      font-size: 0.88rem;
+      font-weight: 750;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    input {
+      width: 100%;
+      min-height: 58px;
+      padding: 14px 15px;
+      color: #fff;
+      background: #11131b;
+      border: 1px solid #ffffff25;
+      border-radius: 12px;
+      outline: none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 1.35rem;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.14em;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    input::placeholder {
+      color: #5e606b;
+    }
+
+    input:focus {
+      border-color: var(--lime);
+      box-shadow: 0 0 0 3px #cbf36b1c;
+    }
+
+    .field-hint {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .field-actions {
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 15px;
+      border: 1px solid transparent;
+      border-radius: 11px;
+      cursor: pointer;
+      font-size: 0.87rem;
+      font-weight: 800;
+      transition: transform 150ms ease, background-color 150ms ease, border-color 150ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .button:focus-visible {
+      outline: 3px solid #ffffffa0;
+      outline-offset: 3px;
+    }
+
+    .button-primary {
+      flex: 1;
+      color: #16190f;
+      background: var(--lime);
+    }
+
+    .button-primary:hover {
+      background: #dcff8e;
+    }
+
+    .button-secondary {
+      color: #e6e4ed;
+      background: #ffffff08;
+      border-color: #ffffff20;
+    }
+
+    .button-secondary:hover {
+      background: #ffffff12;
+    }
+
+    .result {
+      min-height: 74px;
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid #ffffff10;
+      border-radius: 13px;
+      background: #11131b80;
+    }
+
+    .result[data-state="valid"] {
+      border-color: #cbf36b60;
+      background: #cbf36b0c;
+    }
+
+    .result[data-state="invalid"] {
+      border-color: #ff737360;
+      background: #ff73730b;
+    }
+
+    .result-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 850;
+    }
+
+    .result[data-state="valid"] .result-title {
+      color: var(--lime);
+    }
+
+    .result[data-state="invalid"] .result-title {
+      color: #ff8989;
+    }
+
+    .result-detail {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .privacy-note {
+      display: flex;
+      gap: 9px;
+      margin: 15px 0 0;
+      color: #a5a6b2;
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .privacy-note strong {
+      color: #d9d8df;
+    }
+
+    .game-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .game-panel .section-heading {
+      margin-bottom: 16px;
+    }
+
+    .game-stats {
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .stat {
+      min-width: 58px;
+      padding: 6px 9px;
+      text-align: center;
+      background: #11131b;
+      border: 1px solid #ffffff12;
+      border-radius: 9px;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      display: block;
+      margin-top: 2px;
+      color: var(--lime);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 1rem;
+      font-weight: 850;
+    }
+
+    .game-frame {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #ffffff18;
+      border-radius: 14px;
+      background: #171928;
+      line-height: 0;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 760 / 320;
+      image-rendering: pixelated;
+    }
+
+    .game-overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: #10121dbd;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .game-overlay[hidden] {
+      display: none;
+    }
+
+    .overlay-card {
+      max-width: 330px;
+    }
+
+    .overlay-emoji {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 2rem;
+    }
+
+    .overlay-title {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 900;
+    }
+
+    .overlay-copy {
+      margin: 6px 0 13px;
+      color: #c2c2cd;
+      font-size: 0.82rem;
+    }
+
+    .start-button {
+      color: #16190f;
+      background: var(--lime);
+    }
+
+    .game-controls {
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 13px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.5;
+    }
+
+    .game-controls p {
+      margin: 0;
+    }
+
+    .shield-count {
+      flex: 0 0 auto;
+      color: #d8ebad;
+      font-weight: 750;
+    }
+
+    .game-action {
+      margin-top: 14px;
+    }
+
+    .game-action .button {
+      width: 100%;
+    }
+
+    .footer {
+      margin: 19px 0 0;
+      color: #777986;
+      font-size: 0.73rem;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 780px) {
+      body {
+        padding: 24px 15px;
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 460px) {
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .local-badge {
+        max-width: 116px;
+        font-size: 0.68rem;
+        text-align: center;
+      }
+
+      .game-panel .section-heading {
+        flex-wrap: wrap;
+      }
+
+      .game-stats {
+        width: 100%;
+        margin-left: 50px;
+      }
+
+      .game-controls {
+        align-items: flex-start;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">◆</span>
+        <div>
+          <p class="brand-name">Misión Cédula</p>
+          <p class="brand-caption">Validador ecuatoriano + arcade</p>
+        </div>
+      </div>
+      <span class="local-badge">🔒 Todo se queda en tu navegador</span>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow"><span aria-hidden="true">✦</span> Tu identidad, en modo misión</p>
+      <h1 id="page-title">Valida. Verifica.<br><span>¡Llega a la cima!</span></h1>
+      <p class="hero-copy">Comprueba el formato y dígito verificador de una cédula ecuatoriana. Luego, toma un descanso con un minijuego arcade original.</p>
+    </section>
+
+    <div class="content-grid">
+      <section class="panel validator-panel" aria-labelledby="validator-title">
+        <div class="section-heading">
+          <span class="section-icon" aria-hidden="true">✓</span>
+          <div>
+            <h2 id="validator-title">Validador de cédula</h2>
+            <p>Revisión local, sin enviar datos</p>
+          </div>
+        </div>
+
+        <form id="validator-form" novalidate>
+          <label for="cedula">Número de cédula</label>
+          <div class="input-wrap">
+            <input
+              id="cedula"
+              name="cedula"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="10"
+              placeholder="0123456789"
+              aria-describedby="cedula-hint result-detail"
+            >
+          </div>
+          <p class="field-hint" id="cedula-hint">Ingresa los 10 dígitos, sin espacios ni guiones.</p>
+          <div class="field-actions">
+            <button class="button button-primary" type="submit">Revisar cédula <span aria-hidden="true">→</span></button>
+            <button class="button button-secondary" id="clear-button" type="button">Limpiar</button>
+          </div>
+        </form>
+
+        <div class="result" id="result" data-state="idle" role="status" aria-live="polite" aria-atomic="true">
+          <p class="result-title" id="result-title"><span aria-hidden="true">◎</span> Esperando tu número</p>
+          <p class="result-detail" id="result-detail">Tu cédula no se guarda ni se comparte.</p>
+        </div>
+        <p class="privacy-note"><span aria-hidden="true">🛡️</span><span><strong>Privacidad primero:</strong> la validación ocurre únicamente en este dispositivo. No ingreses datos de otra persona sin su permiso.</span></p>
+      </section>
+
+      <section class="panel game-panel" aria-labelledby="game-title">
+        <div class="section-heading">
+          <span class="section-icon" aria-hidden="true">⬆</span>
+          <div>
+            <h2 id="game-title">Rescate en la torre</h2>
+            <p>Salta los barriles y consigue puntos</p>
+          </div>
+          <div class="game-stats" aria-label="Estadísticas del juego">
+            <div class="stat"><span class="stat-label">Puntos</span><span class="stat-value" id="score">00</span></div>
+            <div class="stat"><span class="stat-label">Récord</span><span class="stat-value" id="best-score">00</span></div>
+          </div>
+        </div>
+
+        <div class="game-frame">
+          <canvas id="game-canvas" width="760" height="320" role="img" aria-label="Minijuego: salta los barriles que avanzan por la plataforma"></canvas>
+          <div class="game-overlay" id="game-overlay">
+            <div class="overlay-card">
+              <span class="overlay-emoji" aria-hidden="true">🛢️</span>
+              <p class="overlay-title" id="overlay-title">¿Listo para subir?</p>
+              <p class="overlay-copy" id="overlay-copy">Esquiva los barriles el mayor tiempo posible. ¡Tu misión empieza aquí!</p>
+              <button class="button start-button" id="start-button" type="button">Iniciar partida</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-controls">
+          <p><strong>Controles:</strong> espacio, ↑ o clic para saltar.</p>
+          <p class="shield-count" id="shield-count">Escudos: 0</p>
+        </div>
+        <div class="game-action">
+          <button class="button button-secondary" id="shield-button" type="button" disabled>Usar escudo de validación</button>
+        </div>
+      </section>
+    </div>
+
+    <p class="footer">Herramienta educativa. Comprueba el formato y algoritmo de validación; no confirma la identidad ni el estado legal de una persona.</p>
+  </main>
+
+  <script>
+    const form = document.querySelector("#validator-form");
+    const input = document.querySelector("#cedula");
+    const result = document.querySelector("#result");
+    const resultTitle = document.querySelector("#result-title");
+    const resultDetail = document.querySelector("#result-detail");
+    const clearButton = document.querySelector("#clear-button");
+    const shieldButton = document.querySelector("#shield-button");
+    const shieldCountLabel = document.querySelector("#shield-count");
+    let shields = 0;
+    let previousValidCedula = "";
+
+    function validateCedula(value) {
+      if (!/^\d{10}$/.test(value)) {
+        return { valid: false, message: "La cédula debe tener exactamente 10 dígitos numéricos." };
+      }
+
+      const province = Number(value.slice(0, 2));
+      if (province < 1 || province > 24) {
+        return { valid: false, message: "El código de provincia debe estar entre 01 y 24." };
+      }
+
+      const thirdDigit = Number(value[2]);
+      if (thirdDigit > 5) {
+        return { valid: false, message: "El tercer dígito debe estar entre 0 y 5 para una cédula de persona natural." };
+      }
+
+      let sum = 0;
+      for (let index = 0; index < 9; index += 1) {
+        let digit = Number(value[index]);
+        if (index % 2 === 0) {
+          digit *= 2;
+          if (digit > 9) digit -= 9;
+        }
+        sum += digit;
+      }
+
+      const checkDigit = (10 - (sum % 10)) % 10;
+      if (checkDigit !== Number(value[9])) {
+        return { valid: false, message: "El dígito verificador no coincide. Revisa el número e inténtalo de nuevo." };
+      }
+
+      return { valid: true, message: "Formato, provincia y dígito verificador correctos." };
+    }
+
+    function updateShieldCount() {
+      shieldCountLabel.textContent = `Escudos: ${shields}`;
+      shieldButton.disabled = shields === 0;
+      shieldButton.textContent = shields > 0
+        ? `Usar escudo de validación (${shields})`
+        : "Usar escudo de validación";
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const value = input.value.trim();
+      const validation = validateCedula(value);
+      result.dataset.state = validation.valid ? "valid" : "invalid";
+
+      if (validation.valid) {
+        resultTitle.innerHTML = '<span aria-hidden="true">✓</span> ¡Cédula válida!';
+        resultDetail.textContent = validation.message;
+        if (value !== previousValidCedula) {
+          shields += 1;
+          previousValidCedula = value;
+          updateShieldCount();
+        }
+      } else {
+        resultTitle.innerHTML = '<span aria-hidden="true">!</span> Cédula no válida';
+        resultDetail.textContent = validation.message;
+        previousValidCedula = "";
+      }
+    });
+
+    clearButton.addEventListener("click", () => {
+      input.value = "";
+      previousValidCedula = "";
+      result.dataset.state = "idle";
+      resultTitle.innerHTML = '<span aria-hidden="true">◎</span> Esperando tu número';
+      resultDetail.textContent = "Tu cédula no se guarda ni se comparte.";
+      input.focus();
+    });
+
+    const canvas = document.querySelector("#game-canvas");
+    const ctx = canvas.getContext("2d");
+    const scoreLabel = document.querySelector("#score");
+    const bestScoreLabel = document.querySelector("#best-score");
+    const overlay = document.querySelector("#game-overlay");
+    const overlayTitle = document.querySelector("#overlay-title");
+    const overlayCopy = document.querySelector("#overlay-copy");
+    const startButton = document.querySelector("#start-button");
+    const world = { width: 760, height: 320, ground: 275 };
+    const player = { x: 105, y: 0, width: 31, height: 39, velocityY: 0, grounded: true, shielded: false };
+    let barrels = [];
+    let score = 0;
+    let bestScore = 0;
+    let gameRunning = false;
+    let frame = 0;
+    let animationFrame = 0;
+
+    try {
+      bestScore = Number(window.localStorage.getItem("mision-cedula-best")) || 0;
+    } catch (error) {
+      console.warn("No se pudo leer el récord local del juego.", error);
+    }
+    bestScoreLabel.textContent = String(bestScore).padStart(2, "0");
+
+    function drawScene() {
+      ctx.clearRect(0, 0, world.width, world.height);
+      const sky = ctx.createLinearGradient(0, 0, 0, world.height);
+      sky.addColorStop(0, "#20243a");
+      sky.addColorStop(1, "#191c2a");
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, world.width, world.height);
+
+      ctx.fillStyle = "#ffffff08";
+      for (let index = 0; index < 9; index += 1) {
+        const x = 30 + index * 91;
+        const height = 65 + (index % 3) * 20;
+        ctx.fillRect(x, world.ground - height, 34, height);
+        ctx.fillRect(x + 9, world.ground - height + 12, 5, 5);
+        ctx.fillRect(x + 21, world.ground - height + 12, 5, 5);
+      }
+
+      ctx.fillStyle = "#353443";
+      ctx.fillRect(0, world.ground, world.width, world.height - world.ground);
+      ctx.fillStyle = "#cbf36b";
+      ctx.fillRect(0, world.ground, world.width, 4);
+      ctx.fillStyle = "#ffffff18";
+      for (let x = 10; x < world.width; x += 34) {
+        ctx.fillRect(x, world.ground + 15, 18, 4);
+      }
+
+      for (const barrel of barrels) {
+        ctx.save();
+        ctx.translate(barrel.x + barrel.radius, barrel.y + barrel.radius);
+        ctx.rotate(barrel.rotation);
+        ctx.fillStyle = "#dd7945";
+        ctx.beginPath();
+        ctx.arc(0, 0, barrel.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#743e35";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-barrel.radius + 3, -barrel.radius / 2);
+        ctx.lineTo(barrel.radius - 3, -barrel.radius / 2);
+        ctx.moveTo(-barrel.radius + 3, barrel.radius / 2);
+        ctx.lineTo(barrel.radius - 3, barrel.radius / 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      const playerBottom = player.y + player.height;
+      ctx.fillStyle = player.shielded ? "#c9f0ff" : "#f4c45e";
+      ctx.fillRect(player.x + 5, player.y + 13, 22, 25);
+      ctx.fillStyle = "#f7f3e8";
+      ctx.fillRect(player.x + 4, player.y + 2, 23, 18);
+      ctx.fillStyle = "#20212b";
+      ctx.fillRect(player.x + 9, player.y + 8, 3, 3);
+      ctx.fillRect(player.x + 20, player.y + 8, 3, 3);
+      ctx.fillStyle = "#d87952";
+      ctx.fillRect(player.x, player.y + 4, 31, 6);
+      ctx.fillStyle = "#e9e5d8";
+      ctx.fillRect(player.x + 7, playerBottom - 4, 7, 4);
+      ctx.fillRect(player.x + 20, playerBottom - 4, 7, 4);
+
+      if (player.shielded) {
+        ctx.strokeStyle = "#c9f0ffb0";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(player.x + player.width / 2, player.y + player.height / 2, 28, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    function resetGame() {
+      score = 0;
+      frame = 0;
+      barrels = [];
+      player.y = world.ground - player.height;
+      player.velocityY = 0;
+      player.grounded = true;
+      player.shielded = false;
+      scoreLabel.textContent = "00";
+      gameRunning = true;
+      overlay.hidden = true;
+      cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(gameLoop);
+    }
+
+    function jump() {
+      if (!gameRunning || !player.grounded) return;
+      player.velocityY = -12.5;
+      player.grounded = false;
+    }
+
+    function endGame() {
+      gameRunning = false;
+      overlayTitle.textContent = "¡Fin de la misión!";
+      overlayCopy.textContent = `Conseguiste ${score} ${score === 1 ? "punto" : "puntos"}. ¿Intentamos otra vez?`;
+      startButton.textContent = "Jugar de nuevo";
+      overlay.hidden = false;
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+      frame += 1;
+
+      if (frame % 88 === 0) {
+        barrels.push({ x: world.width, y: world.ground - 25, radius: 17, rotation: 0, speed: 4 + Math.min(score / 12, 3) });
+      }
+
+      player.velocityY += 0.58;
+      player.y += player.velocityY;
+      if (player.y + player.height >= world.ground) {
+        player.y = world.ground - player.height;
+        player.velocityY = 0;
+        player.grounded = true;
+      }
+
+      for (const barrel of barrels) {
+        barrel.x -= barrel.speed;
+        barrel.rotation -= 0.12;
+        const overlaps = player.x + player.width - 5 > barrel.x + 4
+          && player.x + 5 < barrel.x + barrel.radius * 2 - 4
+          && player.y + player.height - 3 > barrel.y + 4
+          && player.y + 3 < barrel.y + barrel.radius * 2 - 4;
+        if (overlaps && player.shielded) {
+          player.shielded = false;
+          barrel.x = -100;
+          shields -= 1;
+          updateShieldCount();
+        } else if (overlaps) {
+          drawScene();
+          endGame();
+          return;
+        }
+        if (!barrel.counted && barrel.x + barrel.radius * 2 < player.x) {
+          barrel.counted = true;
+          score += 1;
+          scoreLabel.textContent = String(score).padStart(2, "0");
+          if (score > bestScore) {
+            bestScore = score;
+            bestScoreLabel.textContent = String(bestScore).padStart(2, "0");
+            try {
+              window.localStorage.setItem("mision-cedula-best", String(bestScore));
+            } catch (error) {
+              console.warn("No se pudo guardar el récord local del juego.", error);
+            }
+          }
+        }
+      }
+      barrels = barrels.filter((barrel) => barrel.x > -barrel.radius * 2);
+      drawScene();
+      animationFrame = requestAnimationFrame(gameLoop);
+    }
+
+    startButton.addEventListener("click", resetGame);
+    shieldButton.addEventListener("click", () => {
+      if (!gameRunning || shields === 0 || player.shielded) return;
+      player.shielded = true;
+      shields -= 1;
+      updateShieldCount();
+      drawScene();
+    });
+
+    canvas.addEventListener("pointerdown", jump);
+    document.addEventListener("keydown", (event) => {
+      if (event.code === "Space" || event.code === "ArrowUp") {
+        if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement) return;
+        event.preventDefault();
+        jump();
+      }
+    });
+
+    drawScene();
+    updateShieldCount();
+  </script>
+</body>
+</html>

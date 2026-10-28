@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a2a">
+  <title>One Piece · Calculadora científica</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f7f2e8;
+      background: #101a2a;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --muted: #aeb9c7;
+      --panel: #17243a;
+      --panel-border: #ffffff12;
+      --accent: #e74b3c;
+      --mint: #f2c66d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: grid;
+      min-height: 100vh;
+      margin: 0;
+      place-items: center;
+      padding: 32px 18px;
+      background:
+        radial-gradient(ellipse at 15% 12%, #1e4560 0, transparent 39%),
+        radial-gradient(ellipse at 85% 85%, #7b352b55 0, transparent 34%),
+        linear-gradient(135deg, #142338, #0d1522 55%, #1a2330);
+    }
+
+    body::before,
+    body::after {
+      position: fixed;
+      z-index: 0;
+      content: "";
+      pointer-events: none;
+    }
+
+    body::before {
+      top: 8%;
+      right: max(3%, calc((100vw - 1180px) / 2));
+      width: clamp(180px, 28vw, 340px);
+      aspect-ratio: 1;
+      border: 2px solid #f2c66d35;
+      border-radius: 50%;
+      background:
+        linear-gradient(90deg, transparent 48.8%, #f2c66d35 49.4% 50.6%, transparent 51.2%),
+        linear-gradient(0deg, transparent 48.8%, #f2c66d35 49.4% 50.6%, transparent 51.2%),
+        radial-gradient(ellipse at 50% 50%, transparent 48%, #f2c66d35 49% 50%, transparent 51%),
+        radial-gradient(circle at 32% 28%, #297ca544, #142338 72%);
+      box-shadow: inset 0 0 35px #f2c66d12;
+      opacity: 0.65;
+      transform: rotate(-28deg);
+    }
+
+    body::after {
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent calc(50% - 1px), #f2c66d0c 50%, transparent calc(50% + 1px)),
+        radial-gradient(ellipse at 50% 50%, transparent 0 115px, #f2c66d10 116px 117px, transparent 118px),
+        radial-gradient(ellipse at 50% 0%, transparent 0 290px, #f2c66d0b 291px 292px, transparent 293px),
+        radial-gradient(ellipse at 50% 100%, transparent 0 290px, #f2c66d0b 291px 292px, transparent 293px);
+    }
+
+    button {
+      color: inherit;
+      font: inherit;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 980px);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      padding: 0 4px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      color: white;
+      background: linear-gradient(145deg, #ef5b48, #a9272b);
+      border-radius: 14px;
+      box-shadow: 0 8px 28px #e74b3c55;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.02rem;
+      letter-spacing: 0.02em;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      padding: 4px;
+      background: #191426eF;
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+    }
+
+    .mode-toggle button {
+      padding: 8px 12px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .mode-toggle button[aria-pressed="true"] {
+      color: #fff;
+      background: #492e32;
+      box-shadow: inset 0 0 0 1px #e74b3c55;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 250px;
+      gap: 16px;
+    }
+
+    .calculator,
+    .history-panel {
+      background: linear-gradient(145deg, #1c2a40f2, #121d2df5);
+      border: 1px solid var(--panel-border);
+      border-radius: 24px;
+      box-shadow: 0 28px 80px #0005, inset 0 1px #ffffff08;
+    }
+
+    .calculator {
+      padding: 22px;
+    }
+
+    .display {
+      display: flex;
+      min-height: 150px;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+      gap: 12px;
+      overflow: hidden;
+      padding: 18px 8px 24px;
+      text-align: right;
+    }
+
+    .expression {
+      width: 100%;
+      min-height: 1.5em;
+      overflow: hidden;
+      color: #929bb5;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .result {
+      width: 100%;
+      overflow: hidden;
+      color: #fff;
+      font-size: clamp(2.5rem, 7vw, 4.5rem);
+      font-variant-numeric: tabular-nums;
+      font-weight: 550;
+      letter-spacing: -0.055em;
+      line-height: 1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .result.is-error {
+      color: #ff8c9d;
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      letter-spacing: 0;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .key {
+      min-height: 56px;
+      padding: 10px 5px;
+      background: #1c2a40;
+      border: 1px solid #ffffff08;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 1.05rem;
+      font-weight: 600;
+      transition: transform 120ms ease, background-color 120ms ease, border-color 120ms ease;
+    }
+
+    .key:hover {
+      background: #29334e;
+      border-color: #ffffff18;
+      transform: translateY(-2px);
+    }
+
+    .key.number {
+      position: relative;
+      display: grid;
+      overflow: hidden;
+      place-items: center;
+      border-color: #f2c66d55;
+      box-shadow: inset 0 0 0 1px #ffffff18, inset 0 -16px 25px #101a2a25;
+      color: #fff8e8;
+      isolation: isolate;
+      text-shadow: 0 2px 7px #101a2acc;
+    }
+
+    .key.number:hover {
+      border-color: #f2c66d;
+      filter: brightness(1.12);
+    }
+
+    .number-art {
+      position: absolute;
+      top: 2px;
+      right: 6px;
+      z-index: -1;
+      color: #fff1cf;
+      font-size: 1.8rem;
+      line-height: 1;
+      opacity: 0.5;
+      pointer-events: none;
+      text-shadow: 0 1px 9px #101a2a66;
+    }
+
+    .key.number[data-insert="7"] {
+      background:
+        repeating-linear-gradient(165deg, transparent 0 12px, #d3f1f326 13px 14px, transparent 15px 24px),
+        radial-gradient(ellipse at 80% 20%, #51a6bb 0, transparent 55%),
+        linear-gradient(145deg, #235a73, #142e49);
+    }
+
+    .key.number[data-insert="8"] {
+      background:
+        repeating-linear-gradient(0deg, transparent 0 15px, #775b3530 16px, transparent 17px 26px),
+        repeating-linear-gradient(90deg, transparent 0 22px, #775b3522 23px, transparent 24px 36px),
+        radial-gradient(circle at 75% 25%, #e7cf9a, transparent 58%),
+        linear-gradient(145deg, #b19a6a, #64563e);
+    }
+
+    .key.number[data-insert="9"] {
+      background:
+        radial-gradient(circle at 72% 25%, transparent 0 17px, #f4daa455 18px 19px, transparent 20px),
+        radial-gradient(circle at 72% 25%, #f1c77b, transparent 45%),
+        linear-gradient(145deg, #865b3f, #3d3541);
+    }
+
+    .key.number[data-insert="4"] {
+      background:
+        radial-gradient(ellipse at 70% 25%, #83a96b 0 9%, transparent 10%),
+        radial-gradient(ellipse at 83% 40%, #6d9a62 0 13%, transparent 14%),
+        radial-gradient(ellipse at 56% 48%, #a4af70 0 10%, transparent 11%),
+        linear-gradient(155deg, #306d68, #1c3947);
+    }
+
+    .key.number[data-insert="5"] {
+      background:
+        repeating-linear-gradient(90deg, transparent 0 20px, #3b201d66 21px 23px),
+        repeating-linear-gradient(0deg, transparent 0 27px, #e3ac6b20 28px 29px),
+        linear-gradient(135deg, #a7633e, #53352f);
+    }
+
+    .key.number[data-insert="6"] {
+      background:
+        radial-gradient(ellipse at 70% 25%, transparent 0 12px, #adc4d333 13px 14px, transparent 15px 22px, #adc4d322 23px 24px, transparent 25px),
+        repeating-linear-gradient(160deg, transparent 0 20px, #d9e6ef18 21px 22px, transparent 23px 34px),
+        linear-gradient(145deg, #43586b, #182638);
+    }
+
+    .key.number[data-insert="1"] {
+      background:
+        linear-gradient(90deg, transparent 48%, #f9dda755 49% 51%, transparent 52%),
+        linear-gradient(0deg, transparent 48%, #f9dda755 49% 51%, transparent 52%),
+        radial-gradient(circle at 50% 50%, transparent 0 14px, #f9dda755 15px 16px, transparent 17px),
+        linear-gradient(145deg, #a4493e, #542f3b);
+    }
+
+    .key.number[data-insert="2"] {
+      background:
+        repeating-radial-gradient(ellipse at 70% 15%, transparent 0 10px, #b8e5d52b 11px 12px, transparent 13px 21px),
+        linear-gradient(150deg, #428b84, #244750 72%);
+    }
+
+    .key.number[data-insert="3"] {
+      background:
+        radial-gradient(circle at 76% 24%, #fff0ba 0 4px, #f1c66eaa 5px 8px, transparent 9px),
+        radial-gradient(circle at 61% 40%, #f3cf78 0 2px, transparent 3px),
+        radial-gradient(circle at 85% 47%, #f3cf78 0 3px, transparent 4px),
+        linear-gradient(145deg, #bd7b37, #633f35);
+    }
+
+    .key.number[data-insert="0"] {
+      background:
+        radial-gradient(circle at 22% 28%, #f7e5b3 0 1px, transparent 2px),
+        radial-gradient(circle at 73% 21%, #f7e5b3 0 1px, transparent 2px),
+        radial-gradient(circle at 52% 48%, #f7e5b3 0 1px, transparent 2px),
+        radial-gradient(circle at 82% 60%, #f7e5b3 0 1px, transparent 2px),
+        radial-gradient(ellipse at 75% 20%, #406b91, transparent 55%),
+        linear-gradient(145deg, #233b62, #121d38);
+    }
+
+    .key:active {
+      transform: translateY(0);
+    }
+
+    .key:focus-visible,
+    .mode-toggle button:focus-visible,
+    .history-item:focus-visible,
+    .clear-history:focus-visible {
+      outline: 2px solid var(--mint);
+      outline-offset: 2px;
+    }
+
+    .key.scientific {
+      color: #f2c66d;
+      background: #263448;
+      font-size: 0.88rem;
+    }
+
+    .key.operator {
+      color: #ff8272;
+      background: #472d35;
+      font-size: 1.25rem;
+    }
+
+    .key.utility {
+      color: #ff9daa;
+      background: #352738;
+      font-size: 0.85rem;
+    }
+
+    .key.equals {
+      color: #fff8ed;
+      background: linear-gradient(145deg, #ef6654, #bd342f);
+      border-color: transparent;
+      box-shadow: 0 8px 22px #e74b3c33;
+      font-size: 1.35rem;
+    }
+
+    .key.equals:hover {
+      background: #fa7b65;
+    }
+
+    .history-panel {
+      display: flex;
+      min-height: 100%;
+      flex-direction: column;
+      padding: 20px 17px;
+    }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 2px 2px 16px;
+      border-bottom: 1px solid #ffffff10;
+    }
+
+    .history-header h2 {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .history-header span {
+      color: var(--muted);
+      font-size: 0.7rem;
+    }
+
+    .history-list {
+      display: grid;
+      align-content: start;
+      gap: 4px;
+      margin: 0;
+      padding: 10px 0;
+      list-style: none;
+    }
+
+    .history-item {
+      width: 100%;
+      padding: 11px 9px;
+      text-align: right;
+      background: transparent;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .history-item:hover {
+      background: #ffffff09;
+    }
+
+    .history-expression,
+    .history-result {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-expression {
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .history-result {
+      color: #e8eaff;
+      font-size: 1rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .empty-history {
+      padding: 20px 8px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .clear-history {
+      margin-top: auto;
+      padding: 10px;
+      color: #8e98b2;
+      background: transparent;
+      border: 1px solid #ffffff12;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+
+    .clear-history:hover {
+      color: #ff9daa;
+      border-color: #ff9daa55;
+    }
+
+    .hint {
+      margin: 15px 4px 0;
+      color: #77809b;
+      font-size: 0.74rem;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .history-panel {
+        min-height: auto;
+      }
+
+      .history-list {
+        max-height: 190px;
+        overflow-y: auto;
+      }
+
+      .clear-history {
+        margin-top: 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 20px 12px;
+      }
+
+      .calculator {
+        padding: 14px;
+        border-radius: 20px;
+      }
+
+      .keypad {
+        gap: 7px;
+      }
+
+      .key {
+        min-height: 50px;
+        border-radius: 12px;
+        font-size: 0.98rem;
+      }
+
+      .key.scientific {
+        font-size: 0.78rem;
+      }
+
+      .display {
+        min-height: 130px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">☠</div>
+        <div>
+          <h1>ONE PIECE</h1>
+          <p>Grand Line · Calculadora científica</p>
+        </div>
+      </div>
+      <div class="mode-toggle" role="group" aria-label="Unidad de los ángulos">
+        <button id="degrees" type="button" aria-pressed="true">DEG</button>
+        <button id="radians" type="button" aria-pressed="false">RAD</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="calculator" aria-label="Calculadora científica">
+        <div class="display" aria-live="polite" aria-atomic="true">
+          <div class="expression" id="expression"></div>
+          <div class="result" id="result">0</div>
+        </div>
+        <div class="keypad" aria-label="Teclado de la calculadora">
+          <button class="key scientific" type="button" data-insert="sin(">sin</button>
+          <button class="key scientific" type="button" data-insert="cos(">cos</button>
+          <button class="key scientific" type="button" data-insert="tan(">tan</button>
+          <button class="key scientific" type="button" data-insert="sqrt(">√</button>
+          <button class="key utility" type="button" data-action="clear">AC</button>
+
+          <button class="key scientific" type="button" data-insert="log(">log</button>
+          <button class="key scientific" type="button" data-insert="ln(">ln</button>
+          <button class="key scientific" type="button" data-insert="π">π</button>
+          <button class="key scientific" type="button" data-insert="(">(</button>
+          <button class="key scientific" type="button" data-insert=")">)</button>
+
+          <button class="key scientific" type="button" data-insert="^2">x²</button>
+          <button class="key scientific" type="button" data-insert="^">xʸ</button>
+          <button class="key scientific" type="button" data-insert="!">x!</button>
+          <button class="key scientific" type="button" data-insert="%">%</button>
+          <button class="key utility" type="button" data-action="backspace" aria-label="Borrar último carácter">⌫</button>
+
+          <button class="key number" type="button" data-insert="7"><span class="number-art" aria-hidden="true">≈</span><span>7</span></button>
+          <button class="key number" type="button" data-insert="8"><span class="number-art" aria-hidden="true">◈</span><span>8</span></button>
+          <button class="key number" type="button" data-insert="9"><span class="number-art" aria-hidden="true">⌖</span><span>9</span></button>
+          <button class="key operator" type="button" data-insert="÷">÷</button>
+          <button class="key scientific" type="button" data-insert="e">e</button>
+
+          <button class="key number" type="button" data-insert="4"><span class="number-art" aria-hidden="true">◉</span><span>4</span></button>
+          <button class="key number" type="button" data-insert="5"><span class="number-art" aria-hidden="true">⛵</span><span>5</span></button>
+          <button class="key number" type="button" data-insert="6"><span class="number-art" aria-hidden="true">⚓</span><span>6</span></button>
+          <button class="key operator" type="button" data-insert="×">×</button>
+          <button class="key scientific" type="button" data-insert="Ans">Ans</button>
+
+          <button class="key number" type="button" data-insert="1"><span class="number-art" aria-hidden="true">✳</span><span>1</span></button>
+          <button class="key number" type="button" data-insert="2"><span class="number-art" aria-hidden="true">≋</span><span>2</span></button>
+          <button class="key number" type="button" data-insert="3"><span class="number-art" aria-hidden="true">◇</span><span>3</span></button>
+          <button class="key operator" type="button" data-insert="−">−</button>
+          <button class="key scientific" type="button" data-insert="abs(">abs</button>
+
+          <button class="key number" type="button" data-insert="0"><span class="number-art" aria-hidden="true">☠</span><span>0</span></button>
+          <button class="key" type="button" data-insert=".">.</button>
+          <button class="key" type="button" data-insert="Ans">Ans</button>
+          <button class="key operator" type="button" data-insert="+">+</button>
+          <button class="key equals" type="button" data-action="equals" aria-label="Calcular resultado">=</button>
+        </div>
+        <p class="hint">Teclado: números y operadores · Enter para calcular · Esc para limpiar</p>
+      </section>
+
+      <aside class="history-panel" aria-labelledby="history-title">
+        <div class="history-header">
+          <h2 id="history-title">Historial</h2>
+          <span id="history-count">0 cálculos</span>
+        </div>
+        <ol class="history-list" id="history-list">
+          <li class="empty-history">Tus cálculos recientes aparecerán aquí.</li>
+        </ol>
+        <button class="clear-history" id="clear-history" type="button">Limpiar historial</button>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const expressionDisplay = document.querySelector("#expression");
+    const resultDisplay = document.querySelector("#result");
+    const historyList = document.querySelector("#history-list");
+    const historyCount = document.querySelector("#history-count");
+    const degreesButton = document.querySelector("#degrees");
+    const radiansButton = document.querySelector("#radians");
+
+    let expression = "";
+    let answer = 0;
+    let angleMode = "DEG";
+    let justEvaluated = false;
+    const history = [];
+
+    function formatNumber(value) {
+      if (!Number.isFinite(value)) {
+        throw new Error("El resultado no es un número finito");
+      }
+      const rounded = Number.parseFloat(value.toPrecision(12));
+      return Object.is(rounded, -0) ? "0" : String(rounded);
+    }
+
+    function tokenize(source) {
+      const tokens = [];
+      const pattern = /\s*(?:(\d+(?:\.\d*)?|\.\d+)(?:[eE]([+-]?\d+))?|([A-Za-z]+|π)|([()+\-−×÷*/^%!]))/y;
+      let position = 0;
+
+      while (position < source.length) {
+        pattern.lastIndex = position;
+        const match = pattern.exec(source);
+        if (!match) {
+          throw new Error("Expresión no válida");
+        }
+        position = pattern.lastIndex;
+        if (match[1] !== undefined) {
+          const number = Number(`${match[1]}${match[2] === undefined ? "" : `e${match[2]}`}`);
+          if (!Number.isFinite(number)) {
+            throw new Error("Número fuera de rango");
+          }
+          tokens.push({ type: "number", value: number });
+        } else if (match[3] !== undefined) {
+          tokens.push({ type: "name", value: match[3] });
+        } else {
+          tokens.push({ type: "symbol", value: match[4] });
+        }
+      }
+      return tokens;
+    }
+
+    function evaluate(source) {
+      const tokens = tokenize(source);
+      let index = 0;
+      const peek = () => tokens[index];
+      const consume = () => tokens[index++];
+      const match = (...values) => {
+        if (peek() && values.includes(peek().value)) {
+          consume();
+          return true;
+        }
+        return false;
+      };
+
+      function primary() {
+        const token = consume();
+        if (!token) {
+          throw new Error("La expresión está incompleta");
+        }
+        if (token.type === "number") {
+          return token.value;
+        }
+        if (token.type === "name") {
+          if (token.value === "π") return Math.PI;
+          if (token.value === "e") return Math.E;
+          if (token.value === "Ans") return answer;
+
+          const functions = {
+            sin: (value) => Math.sin(angleMode === "DEG" ? value * Math.PI / 180 : value),
+            cos: (value) => Math.cos(angleMode === "DEG" ? value * Math.PI / 180 : value),
+            tan: (value) => Math.tan(angleMode === "DEG" ? value * Math.PI / 180 : value),
+            sqrt: (value) => {
+              if (value < 0) throw new Error("No existe raíz real de un número negativo");
+              return Math.sqrt(value);
+            },
+            log: (value) => {
+              if (value <= 0) throw new Error("log requiere un número mayor que cero");
+              return Math.log10(value);
+            },
+            ln: (value) => {
+              if (value <= 0) throw new Error("ln requiere un número mayor que cero");
+              return Math.log(value);
+            },
+            abs: (value) => Math.abs(value)
+          };
+          const fn = functions[token.value];
+          if (!fn) throw new Error(`Función desconocida: ${token.value}`);
+          if (!match("(")) throw new Error(`Falta "(" después de ${token.value}`);
+          const value = addSub();
+          if (!match(")")) throw new Error("Falta cerrar un paréntesis");
+          return fn(value);
+        }
+        if (token.value === "(") {
+          const value = addSub();
+          if (!match(")")) throw new Error("Falta cerrar un paréntesis");
+          return value;
+        }
+        throw new Error("Expresión no válida");
+      }
+
+      function postfix() {
+        let value = primary();
+        while (match("%", "!")) {
+          const operator = tokens[index - 1].value;
+          if (operator === "%") {
+            value /= 100;
+          } else {
+            if (value < 0 || !Number.isInteger(value) || value > 170) {
+              throw new Error("El factorial requiere un entero entre 0 y 170");
+            }
+            let factorial = 1;
+            for (let n = 2; n <= value; n += 1) factorial *= n;
+            value = factorial;
+          }
+        }
+        return value;
+      }
+
+      function power() {
+        const base = postfix();
+        if (match("^")) {
+          return base ** unary();
+        }
+        return base;
+      }
+
+      function unary() {
+        if (match("+")) return unary();
+        if (match("-", "−")) return -unary();
+        return power();
+      }
+
+      function multiplyDivide() {
+        let value = unary();
+        while (match("*", "×", "/", "÷")) {
+          const operator = tokens[index - 1].value;
+          const right = unary();
+          if ((operator === "/" || operator === "÷") && right === 0) {
+            throw new Error("No se puede dividir entre cero");
+          }
+          value = operator === "*" || operator === "×" ? value * right : value / right;
+        }
+        return value;
+      }
+
+      function addSub() {
+        let value = multiplyDivide();
+        while (match("+", "-", "−")) {
+          const operator = tokens[index - 1].value;
+          const right = multiplyDivide();
+          value = operator === "+" ? value + right : value - right;
+        }
+        return value;
+      }
+
+      if (tokens.length === 0) throw new Error("Escribe una operación");
+      const value = addSub();
+      if (index !== tokens.length) throw new Error("Revisa la expresión");
+      return value;
+    }
+
+    function render() {
+      expressionDisplay.textContent = expression || "";
+    }
+
+    function insert(value) {
+      if (justEvaluated && /^[\d.(πe]|Ans|[A-Za-z]+\(/.test(value)) {
+        expression = "";
+      }
+      justEvaluated = false;
+      expression += value;
+      resultDisplay.classList.remove("is-error");
+      resultDisplay.textContent = expression ? "…" : "0";
+      render();
+    }
+
+    function calculate() {
+      if (!expression.trim()) return;
+      try {
+        const value = evaluate(expression);
+        const formatted = formatNumber(value);
+        const completedExpression = expression;
+        answer = value;
+        resultDisplay.classList.remove("is-error");
+        resultDisplay.textContent = formatted;
+        history.unshift({ expression: completedExpression, result: formatted });
+        history.splice(8);
+        renderHistory();
+        justEvaluated = true;
+      } catch (error) {
+        resultDisplay.classList.add("is-error");
+        resultDisplay.textContent = error instanceof Error ? error.message : "No se pudo calcular";
+      }
+    }
+
+    function renderHistory() {
+      historyList.replaceChildren();
+      historyCount.textContent = `${history.length} ${history.length === 1 ? "cálculo" : "cálculos"}`;
+      if (history.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "empty-history";
+        empty.textContent = "Tus cálculos recientes aparecerán aquí.";
+        historyList.append(empty);
+        return;
+      }
+      for (const item of history) {
+        const row = document.createElement("li");
+        const button = document.createElement("button");
+        button.className = "history-item";
+        button.type = "button";
+        button.setAttribute("aria-label", `${item.expression} igual a ${item.result}`);
+        const expressionText = document.createElement("span");
+        expressionText.className = "history-expression";
+        expressionText.textContent = item.expression;
+        const resultText = document.createElement("span");
+        resultText.className = "history-result";
+        resultText.textContent = `= ${item.result}`;
+        button.append(expressionText, resultText);
+        button.addEventListener("click", () => {
+          expression = item.expression;
+          resultDisplay.textContent = item.result;
+          resultDisplay.classList.remove("is-error");
+          justEvaluated = true;
+          render();
+        });
+        row.append(button);
+        historyList.append(row);
+      }
+    }
+
+    document.querySelector(".keypad").addEventListener("click", (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
+      const { action, insert: value } = button.dataset;
+      if (action === "clear") {
+        expression = "";
+        resultDisplay.textContent = "0";
+        resultDisplay.classList.remove("is-error");
+        justEvaluated = false;
+        render();
+      } else if (action === "backspace") {
+        expression = expression.slice(0, -1);
+        resultDisplay.textContent = expression ? "…" : "0";
+        resultDisplay.classList.remove("is-error");
+        justEvaluated = false;
+        render();
+      } else if (action === "equals") {
+        calculate();
+      } else if (value) {
+        insert(value);
+      }
+    });
+
+    degreesButton.addEventListener("click", () => {
+      angleMode = "DEG";
+      degreesButton.setAttribute("aria-pressed", "true");
+      radiansButton.setAttribute("aria-pressed", "false");
+    });
+
+    radiansButton.addEventListener("click", () => {
+      angleMode = "RAD";
+      radiansButton.setAttribute("aria-pressed", "true");
+      degreesButton.setAttribute("aria-pressed", "false");
+    });
+
+    document.querySelector("#clear-history").addEventListener("click", () => {
+      history.length = 0;
+      renderHistory();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      if (event.key === "Enter" || event.key === "=") {
+        event.preventDefault();
+        calculate();
+      } else if (event.key === "Escape") {
+        expression = "";
+        resultDisplay.textContent = "0";
+        resultDisplay.classList.remove("is-error");
+        justEvaluated = false;
+        render();
+      } else if (event.key === "Backspace") {
+        expression = expression.slice(0, -1);
+        resultDisplay.textContent = expression ? "…" : "0";
+        resultDisplay.classList.remove("is-error");
+        justEvaluated = false;
+        render();
+      } else if (/^[0-9.]$/.test(event.key)) {
+        insert(event.key);
+      } else if (["+", "-", "*", "/", "^", "(", ")", "%", "!"].includes(event.key)) {
+        insert(event.key);
+      }
+    });
+  </script>
+</body>
+</html>

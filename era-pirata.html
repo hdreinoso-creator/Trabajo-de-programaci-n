@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102d36">
+  <meta name="description" content="Embárcate en una aventura por el inicio de la era pirata de One Piece y crea tu propio cartel de recompensa.">
+  <title>La era pirata — One Piece</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f7f0df;
+      background: #102d36;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --ink: #172b2b;
+      --sea: #102d36;
+      --sea-light: #1e4850;
+      --paper: #f3e7c8;
+      --gold: #f2bc57;
+      --muted: #bdc9bd;
+      --coral: #dd7053;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      background: var(--sea);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .site-header {
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      left: 0;
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 24px max(6vw, calc((100vw - 1200px) / 2));
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--paper);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 42px;
+      aspect-ratio: 1;
+      place-items: center;
+      border: 1px solid #f2bc5770;
+      border-radius: 50%;
+      color: var(--gold);
+      font-size: 1.45rem;
+    }
+
+    .site-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(16px, 3vw, 34px);
+      color: #e3e2d2;
+      font-size: 0.83rem;
+      font-weight: 650;
+    }
+
+    .site-nav a {
+      transition: color 160ms ease;
+    }
+
+    .site-nav a:hover,
+    .site-nav a:focus-visible {
+      color: var(--gold);
+    }
+
+    .game-stage {
+      display: grid;
+      min-height: 100vh;
+      min-height: 100svh;
+      align-content: center;
+      justify-items: center;
+      gap: 14px;
+      padding: 104px 6vw 28px;
+      background:
+        radial-gradient(ellipse at 50% 110%, #286269 0, transparent 52%),
+        linear-gradient(180deg, #102d36, #17434b);
+    }
+
+    .game-hud {
+      display: flex;
+      width: min(100%, 900px);
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--paper);
+      font-weight: 800;
+    }
+
+    .game-title {
+      color: var(--gold);
+      font-size: 0.8rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .game-stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 12px 22px;
+      font-size: 0.88rem;
+    }
+
+    .game-stats strong {
+      color: var(--gold);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .game-frame {
+      position: relative;
+      width: min(100%, 900px);
+      overflow: hidden;
+      border: 1px solid #f2bc5755;
+      background: #17434b;
+      box-shadow: 0 24px 70px #06181c80;
+    }
+
+    #game-canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+    }
+
+    .game-start {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 190px;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 5px 24px #071c24a0;
+    }
+
+    .game-start[hidden] {
+      display: none;
+    }
+
+    .game-help {
+      margin: 0;
+      color: #d0d8cb;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .touch-controls {
+      display: none;
+      gap: 18px;
+    }
+
+    .touch-controls button {
+      width: 68px;
+      height: 52px;
+      border: 1px solid #f2bc5770;
+      border-radius: 8px;
+      background: #173640;
+      color: var(--paper);
+      font-size: 1.4rem;
+      touch-action: none;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      min-height: min(790px, 100svh);
+      min-height: min(790px, 100vh);
+      overflow: hidden;
+      align-items: center;
+      padding: 130px max(8vw, calc((100vw - 1120px) / 2)) 92px;
+      background:
+        radial-gradient(ellipse at 77% 27%, #e8ae5b30, transparent 25%),
+        linear-gradient(180deg, #153943 0%, #17434b 62%, #1d5054 100%);
+    }
+
+    .hero::before {
+      position: absolute;
+      right: -10%;
+      bottom: -140px;
+      left: -10%;
+      height: 310px;
+      border-radius: 50% 50% 0 0;
+      background: #0d2932;
+      content: "";
+    }
+
+    .hero::after {
+      position: absolute;
+      right: 12%;
+      bottom: 110px;
+      width: 32%;
+      height: 1px;
+      background: #f2bc5740;
+      box-shadow: 0 12px #f2bc5720, 0 25px #f2bc5718;
+      content: "";
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      width: min(560px, 100%);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--gold);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 30px;
+      height: 1px;
+      background: currentColor;
+      content: "";
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 700px;
+      margin-bottom: 22px;
+      color: var(--paper);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(3.5rem, 8.3vw, 7rem);
+      font-weight: 500;
+      letter-spacing: -0.065em;
+      line-height: 0.91;
+    }
+
+    h1 span {
+      color: var(--gold);
+      font-style: italic;
+    }
+
+    .hero-copy > p {
+      max-width: 480px;
+      margin-bottom: 30px;
+      color: #d0d8cb;
+      font-size: clamp(1rem, 1.5vw, 1.13rem);
+      line-height: 1.75;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 50px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 20px;
+      border: 1px solid transparent;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 800;
+      transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+    }
+
+    .button-primary {
+      background: var(--gold);
+      color: var(--ink);
+    }
+
+    .button-primary:hover {
+      background: #ffd47a;
+    }
+
+    .button-quiet {
+      border-color: #f3e7c85c;
+      color: var(--paper);
+    }
+
+    .button-quiet:hover {
+      background: #ffffff12;
+    }
+
+    .ship-art {
+      position: absolute;
+      right: 2%;
+      bottom: 83px;
+      width: min(53vw, 650px);
+      min-width: 350px;
+      opacity: 0.94;
+      filter: drop-shadow(0 25px 25px #06181c55);
+    }
+
+    .hero-note {
+      position: absolute;
+      z-index: 1;
+      right: max(7vw, calc((100vw - 1200px) / 2));
+      bottom: 45px;
+      color: #d7d6c5;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .section {
+      padding: 104px max(7vw, calc((100vw - 1120px) / 2));
+    }
+
+    .section-light {
+      background:
+        radial-gradient(ellipse at 90% 20%, #e7b45518, transparent 28%),
+        var(--paper);
+      color: var(--ink);
+    }
+
+    .section-dark {
+      background: #0d2932;
+    }
+
+    .section-heading {
+      max-width: 660px;
+      margin-bottom: 42px;
+    }
+
+    .section-heading .eyebrow {
+      margin-bottom: 16px;
+      color: #ad7132;
+    }
+
+    .section-dark .section-heading .eyebrow {
+      color: var(--gold);
+    }
+
+    h2 {
+      margin-bottom: 14px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 500;
+      letter-spacing: -0.045em;
+      line-height: 1.04;
+    }
+
+    .section-heading > p {
+      max-width: 570px;
+      margin-bottom: 0;
+      color: #53605a;
+      line-height: 1.75;
+    }
+
+    .section-dark .section-heading > p {
+      color: var(--muted);
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .timeline-card {
+      position: relative;
+      min-height: 255px;
+      padding: 28px;
+      border: 1px solid #243c3526;
+      background: #fff9e8a6;
+    }
+
+    .timeline-card .number {
+      display: inline-block;
+      margin-bottom: 32px;
+      color: #ad7132;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 2.35rem;
+      font-style: italic;
+    }
+
+    .timeline-card h3 {
+      margin-bottom: 10px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+    }
+
+    .timeline-card p {
+      margin-bottom: 0;
+      color: #59635b;
+      font-size: 0.93rem;
+      line-height: 1.7;
+    }
+
+    .bounty-section {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(320px, 0.8fr);
+      align-items: center;
+      gap: clamp(38px, 8vw, 110px);
+    }
+
+    .bounty-copy .eyebrow {
+      margin-bottom: 16px;
+    }
+
+    .bounty-copy p {
+      max-width: 450px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .bounty-form {
+      display: grid;
+      gap: 18px;
+      padding: clamp(22px, 4vw, 34px);
+      border: 1px solid #e8d9b437;
+      background: #173640;
+      box-shadow: 0 25px 55px #06181c30;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      color: #e8e4d2;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 13px;
+      border: 1px solid #ffffff28;
+      border-radius: 2px;
+      outline: none;
+      background: #102d36;
+      color: #fff8e8;
+    }
+
+    .field input::placeholder {
+      color: #a7b6ae;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px #f2bc5728;
+    }
+
+    .bounty-form .button {
+      width: 100%;
+      margin-top: 2px;
+    }
+
+    .poster {
+      display: none;
+      position: relative;
+      padding: 23px;
+      overflow: hidden;
+      border: 5px double #664c2f;
+      background:
+        radial-gradient(ellipse at 50% 42%, #d9c59b, transparent 49%),
+        #e8d7b0;
+      color: #312c23;
+      text-align: center;
+      box-shadow: inset 0 0 34px #664c2f28;
+    }
+
+    .poster.is-visible {
+      display: block;
+      animation: poster-appear 350ms ease both;
+    }
+
+    .poster-kicker {
+      margin: 0 0 4px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+    }
+
+    .poster-skull {
+      display: grid;
+      width: 88px;
+      aspect-ratio: 1;
+      place-items: center;
+      margin: 12px auto;
+      border: 2px solid #453c30;
+      border-radius: 50%;
+      font-size: 2.8rem;
+    }
+
+    .poster-name {
+      overflow-wrap: anywhere;
+      margin: 10px 0 5px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.6rem, 4vw, 2.3rem);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .poster-role {
+      margin: 0 0 12px;
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .poster-amount {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.55rem, 4vw, 2.2rem);
+      font-weight: 700;
+    }
+
+    .site-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 24px max(7vw, calc((100vw - 1120px) / 2));
+      background: #091f26;
+      color: #b3c0b7;
+      font-size: 0.78rem;
+      line-height: 1.6;
+    }
+
+    .site-footer p {
+      margin: 0;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 4px;
+    }
+
+    @keyframes poster-appear {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .site-header {
+        align-items: flex-start;
+        padding: 18px 6vw;
+      }
+
+      .brand {
+        font-size: 0.73rem;
+      }
+
+      .brand-mark {
+        width: 36px;
+        font-size: 1.2rem;
+      }
+
+      .site-nav {
+        justify-content: flex-end;
+        gap: 10px 16px;
+        font-size: 0.75rem;
+      }
+
+      .hero {
+        min-height: 760px;
+        padding: 140px 7vw 300px;
+      }
+
+      .hero-copy {
+        align-self: start;
+      }
+
+      .ship-art {
+        right: -10%;
+        bottom: 20px;
+        width: 90vw;
+        min-width: 0;
+      }
+
+      .hero::after {
+        right: 5%;
+        bottom: 65px;
+        width: 60%;
+      }
+
+      .hero-note {
+        right: 7vw;
+        bottom: 22px;
+        font-size: 0.61rem;
+      }
+
+      .game-stage {
+        padding: 128px 5vw 24px;
+      }
+
+      .touch-controls {
+        display: flex;
+      }
+
+      .section {
+        padding: 76px 7vw;
+      }
+
+      .timeline {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline-card {
+        min-height: auto;
+      }
+
+      .timeline-card .number {
+        margin-bottom: 18px;
+      }
+
+      .bounty-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .site-header {
+        flex-wrap: wrap;
+      }
+
+      .site-nav {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .hero {
+        min-height: 790px;
+        padding-top: 160px;
+      }
+
+      .game-hud {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .game-stats {
+        justify-content: flex-start;
+        gap: 8px 16px;
+      }
+
+      .hero-actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .hero-actions .button {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#inicio" aria-label="La era pirata, inicio">
+      <span class="brand-mark" aria-hidden="true">☠</span>
+      <span>Crónicas del mar</span>
+    </a>
+    <nav class="site-nav" aria-label="Navegación principal">
+      <a href="#juego">Jugar</a>
+      <a href="#historia">La historia</a>
+      <a href="#recompensa">Tu recompensa</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="game-stage" id="juego" aria-label="Minijuego de navegación">
+      <div class="game-hud">
+        <span class="game-title">☠ La travesía pirata</span>
+        <div class="game-stats" aria-live="polite">
+          <span>🍖 Berries: <strong id="game-score">0</strong></span>
+          <span>❤️ Vidas: <strong id="game-lives">3</strong></span>
+          <span>🏆 Récord: <strong id="game-best">0</strong></span>
+        </div>
+      </div>
+      <div class="game-frame">
+        <canvas id="game-canvas" width="800" height="450" aria-label="Juego: mueve tu barco para recoger tesoros y esquivar rocas"></canvas>
+        <button class="button button-primary game-start" id="game-start" type="button">¡Zarpar! ▶</button>
+      </div>
+      <p class="game-help">Usa ← → o A / D para navegar y recoge los tesoros.</p>
+      <div class="touch-controls" aria-label="Controles táctiles">
+        <button id="move-left" type="button" aria-label="Mover a la izquierda">←</button>
+        <button id="move-right" type="button" aria-label="Mover a la derecha">→</button>
+      </div>
+    </section>
+
+    <section class="hero" id="inicio">
+      <div class="hero-copy">
+        <span class="eyebrow">One Piece · Una nueva aventura</span>
+        <h1>La era pirata <span>comienza.</span></h1>
+        <p>
+          Unas últimas palabras bastaron para encender los sueños de todo el mundo.
+          El mar se llenó de banderas, promesas y tripulaciones en busca del tesoro
+          más legendario.
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#historia">Explorar la historia <span aria-hidden="true">→</span></a>
+          <a class="button button-quiet" href="#recompensa">Crear mi recompensa</a>
+        </div>
+      </div>
+
+      <svg class="ship-art" viewBox="0 0 660 430" role="img" aria-labelledby="ship-title ship-desc">
+        <title id="ship-title">Un barco pirata navegando hacia el horizonte</title>
+        <desc id="ship-desc">Ilustración original de una embarcación de vela frente a un sol dorado.</desc>
+        <defs>
+          <linearGradient id="sail" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f8e9c6"/>
+            <stop offset="1" stop-color="#d6bd8b"/>
+          </linearGradient>
+          <linearGradient id="hull" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8b5337"/>
+            <stop offset="1" stop-color="#482f2a"/>
+          </linearGradient>
+        </defs>
+        <circle cx="456" cy="152" r="77" fill="#f2bc57" opacity=".88"/>
+        <circle cx="456" cy="152" r="99" fill="none" stroke="#f2bc57" stroke-opacity=".23"/>
+        <path d="M72 327c66-21 110-5 168 3 72 10 117-15 187-3 61 10 119 9 177-4" fill="none" stroke="#9dc3b7" stroke-opacity=".45" stroke-width="3"/>
+        <path d="M146 299h404l-63 75H213z" fill="url(#hull)" stroke="#e4bd79" stroke-width="4"/>
+        <path d="M220 294V117l145 177z" fill="url(#sail)" stroke="#5a4940" stroke-width="5"/>
+        <path d="M387 294V85l138 209z" fill="url(#sail)" stroke="#5a4940" stroke-width="5"/>
+        <path d="M216 294h-88l88-120zm177 0h-74l74-126z" fill="#d8c59c" stroke="#5a4940" stroke-width="4"/>
+        <path d="M211 115h183" stroke="#573e35" stroke-width="9" stroke-linecap="round"/>
+        <path d="M211 115V74m182 11V51" stroke="#573e35" stroke-width="7" stroke-linecap="round"/>
+        <path d="M397 52l48 29-48 29z" fill="#dd7053" stroke="#573e35" stroke-width="3"/>
+        <path d="M151 319h390M188 344h338" stroke="#e2bc7d" stroke-opacity=".65" stroke-width="3"/>
+        <path d="M85 391c77-18 124 12 198 0s114-12 181 1 107-2 152-10" fill="none" stroke="#c2d2c3" stroke-opacity=".38" stroke-width="3"/>
+      </svg>
+      <span class="hero-note">El horizonte espera · Grand Line</span>
+    </section>
+
+    <section class="section section-light" id="historia">
+      <div class="section-heading">
+        <span class="eyebrow">El comienzo de todo</span>
+        <h2>Una chispa que prendió en todos los mares.</h2>
+        <p>
+          La ejecución del Rey de los Piratas marcó un antes y un después.
+          Su desafío al mundo convirtió la búsqueda de un sueño en una gran era
+          de aventuras.
+        </p>
+      </div>
+      <div class="timeline">
+        <article class="timeline-card">
+          <span class="number" aria-hidden="true">01</span>
+          <h3>El último desafío</h3>
+          <p>En Loguetown, Gol D. Roger afronta su destino con una sonrisa y deja al mundo una última razón para zarpar.</p>
+        </article>
+        <article class="timeline-card">
+          <span class="number" aria-hidden="true">02</span>
+          <h3>El gran anuncio</h3>
+          <p>La existencia de un tesoro inmenso despierta la imaginación de navegantes, soñadores y futuros capitanes.</p>
+        </article>
+        <article class="timeline-card">
+          <span class="number" aria-hidden="true">03</span>
+          <h3>Rumbo al horizonte</h3>
+          <p>Comienza la Gran Era Pirata: cada tripulación pone rumbo a la aventura con una meta propia.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section section-dark" id="recompensa">
+      <div class="bounty-section">
+        <div class="bounty-copy">
+          <span class="eyebrow">Tu aventura empieza aquí</span>
+          <h2>¿Qué recompensa tendría tu nombre?</h2>
+          <p>
+            Elige tu especialidad y deja que la Marina prepare tu cartel.
+            Esta recompensa es solo por diversión: ¡tú decides qué sueño perseguir!
+          </p>
+        </div>
+        <form class="bounty-form" id="bounty-form">
+          <div class="field">
+            <label for="pirate-name">Nombre de pirata</label>
+            <input id="pirate-name" name="pirateName" type="text" maxlength="24" placeholder="Ej. Capitán del Alba" required>
+          </div>
+          <div class="field">
+            <label for="pirate-role">Especialidad</label>
+            <select id="pirate-role" name="pirateRole">
+              <option value="Capitán" data-min="10000000" data-max="250000000">Capitán</option>
+              <option value="Navegante" data-min="5000000" data-max="80000000">Navegante</option>
+              <option value="Espadachín" data-min="15000000" data-max="180000000">Espadachín</option>
+              <option value="Cocinero" data-min="3000000" data-max="60000000">Cocinero</option>
+              <option value="Médico" data-min="1000000" data-max="50000000">Médico</option>
+              <option value="Músico" data-min="1000000" data-max="70000000">Músico</option>
+            </select>
+          </div>
+          <button class="button button-primary" type="submit">Crear mi cartel <span aria-hidden="true">✦</span></button>
+          <div class="poster" id="poster" aria-live="polite" aria-atomic="true">
+            <p class="poster-kicker">SE BUSCA · VIVO O MUERTO</p>
+            <span class="poster-skull" aria-hidden="true">☠</span>
+            <p class="poster-name" id="poster-name"></p>
+            <p class="poster-role" id="poster-role"></p>
+            <p class="poster-amount" id="poster-amount"></p>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Una pequeña aventura para fans de One Piece. Zarpamos hacia nuestros sueños.</p>
+    <p>Proyecto de fans sin afiliación oficial.</p>
+  </footer>
+
+  <script>
+    const gameCanvas = document.querySelector("#game-canvas");
+    const gameContext = gameCanvas.getContext("2d");
+    const startButton = document.querySelector("#game-start");
+    const scoreDisplay = document.querySelector("#game-score");
+    const livesDisplay = document.querySelector("#game-lives");
+    const bestDisplay = document.querySelector("#game-best");
+    const game = {
+      boatX: 400,
+      score: 0,
+      lives: 3,
+      items: [],
+      keys: new Set(),
+      running: false,
+      lastTime: 0,
+      spawnTime: 0,
+      best: Number(localStorage.getItem("onePieceSailingBest") || 0),
+    };
+    const boatY = 365;
+
+    bestDisplay.textContent = String(game.best);
+
+    function drawGame() {
+      const ctx = gameContext;
+      const width = gameCanvas.width;
+      const height = gameCanvas.height;
+      const water = ctx.createLinearGradient(0, 0, 0, height);
+      water.addColorStop(0, "#24616a");
+      water.addColorStop(1, "#103640");
+      ctx.fillStyle = water;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "#f2bc57";
+      ctx.globalAlpha = 0.8;
+      ctx.beginPath();
+      ctx.arc(650, 92, 38, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      ctx.strokeStyle = "rgba(210, 233, 215, 0.16)";
+      ctx.lineWidth = 2;
+      for (let y = 80; y < height; y += 56) {
+        ctx.beginPath();
+        for (let x = 0; x <= width; x += 8) {
+          const wave = Math.sin((x + y * 2 + performance.now() * 0.035) / 35) * 4;
+          if (x === 0) ctx.moveTo(x, y + wave);
+          else ctx.lineTo(x, y + wave);
+        }
+        ctx.stroke();
+      }
+
+      for (const item of game.items) {
+        ctx.font = "32px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(item.type === "treasure" ? "💰" : "🪨", item.x, item.y);
+      }
+
+      const x = game.boatX;
+      ctx.fillStyle = "#8b5337";
+      ctx.strokeStyle = "#f2bc57";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x - 37, boatY);
+      ctx.lineTo(x + 37, boatY);
+      ctx.lineTo(x + 25, boatY + 22);
+      ctx.lineTo(x - 25, boatY + 22);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#f3e7c8";
+      ctx.beginPath();
+      ctx.moveTo(x - 3, boatY - 60);
+      ctx.lineTo(x - 3, boatY - 5);
+      ctx.lineTo(x - 38, boatY - 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + 4, boatY - 51);
+      ctx.lineTo(x + 4, boatY - 5);
+      ctx.lineTo(x + 34, boatY - 5);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function updateGame(delta) {
+      if (!game.running) return;
+      const seconds = Math.min(delta / 1000, 0.04);
+      if (game.keys.has("ArrowLeft") || game.keys.has("a")) game.boatX -= 330 * seconds;
+      if (game.keys.has("ArrowRight") || game.keys.has("d")) game.boatX += 330 * seconds;
+      game.boatX = Math.max(40, Math.min(760, game.boatX));
+
+      game.spawnTime += delta;
+      const spawnDelay = Math.max(390, 880 - game.score * 12);
+      if (game.spawnTime >= spawnDelay) {
+        game.spawnTime = 0;
+        game.items.push({
+          x: 34 + Math.random() * 732,
+          y: -20,
+          type: Math.random() < 0.68 ? "treasure" : "rock",
+          speed: 150 + Math.random() * 90 + game.score * 2,
+        });
+      }
+
+      for (let i = game.items.length - 1; i >= 0; i--) {
+        const item = game.items[i];
+        item.y += item.speed * seconds;
+        const caught = item.y > boatY - 26 && item.y < boatY + 32 && Math.abs(item.x - game.boatX) < 42;
+        if (caught) {
+          game.items.splice(i, 1);
+          if (item.type === "treasure") {
+            game.score += 1;
+            scoreDisplay.textContent = String(game.score);
+          } else {
+            game.lives -= 1;
+            livesDisplay.textContent = String(game.lives);
+          }
+        } else if (item.y > 480) {
+          game.items.splice(i, 1);
+        }
+      }
+
+      if (game.lives <= 0) {
+        game.running = false;
+        if (game.score > game.best) {
+          game.best = game.score;
+          localStorage.setItem("onePieceSailingBest", String(game.best));
+          bestDisplay.textContent = String(game.best);
+        }
+        startButton.textContent = `Fin del viaje · ${game.score} 💰 · Reintentar`;
+        startButton.hidden = false;
+      }
+    }
+
+    let previousFrame = 0;
+    function gameLoop(timestamp) {
+      const delta = timestamp - previousFrame;
+      previousFrame = timestamp;
+      updateGame(delta);
+      drawGame();
+      requestAnimationFrame(gameLoop);
+    }
+    requestAnimationFrame(gameLoop);
+
+    startButton.addEventListener("click", () => {
+      game.boatX = 400;
+      game.score = 0;
+      game.lives = 3;
+      game.items = [];
+      game.spawnTime = 0;
+      game.running = true;
+      scoreDisplay.textContent = "0";
+      livesDisplay.textContent = "3";
+      startButton.hidden = true;
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (["ArrowLeft", "ArrowRight"].includes(event.key) && game.running) event.preventDefault();
+      game.keys.add(event.key.length === 1 ? event.key.toLowerCase() : event.key);
+      if (event.code === "Space" && !game.running) startButton.click();
+    });
+    window.addEventListener("keyup", (event) => {
+      game.keys.delete(event.key.length === 1 ? event.key.toLowerCase() : event.key);
+    });
+    window.addEventListener("blur", () => game.keys.clear());
+
+    for (const [id, direction] of [["move-left", "a"], ["move-right", "d"]]) {
+      const button = document.querySelector(`#${id}`);
+      button.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        game.keys.add(direction);
+        button.setPointerCapture(event.pointerId);
+      });
+      for (const eventName of ["pointerup", "pointercancel", "lostpointercapture"]) {
+        button.addEventListener(eventName, () => game.keys.delete(direction));
+      }
+    }
+
+    const bountyForm = document.querySelector("#bounty-form");
+    const pirateNameInput = document.querySelector("#pirate-name");
+    const pirateRoleSelect = document.querySelector("#pirate-role");
+    const poster = document.querySelector("#poster");
+    const posterName = document.querySelector("#poster-name");
+    const posterRole = document.querySelector("#poster-role");
+    const posterAmount = document.querySelector("#poster-amount");
+
+    bountyForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const name = pirateNameInput.value.trim();
+      if (!name) {
+        pirateNameInput.focus();
+        return;
+      }
+
+      const selectedRole = pirateRoleSelect.selectedOptions[0];
+      const minimum = Number(selectedRole.dataset.min);
+      const maximum = Number(selectedRole.dataset.max);
+      const reward = Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+
+      posterName.textContent = name;
+      posterRole.textContent = selectedRole.value;
+      posterAmount.textContent = `${new Intl.NumberFormat("es-ES").format(reward)} berries`;
+      poster.classList.add("is-visible");
+    });
+  </script>
+</body>
+</html>

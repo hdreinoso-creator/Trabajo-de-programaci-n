@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111714">
+  <title>Cancha | Rutinas de baloncesto</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f3f1e9;
+      background: #111714;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --muted: #a0aaa1;
+      --panel: #1a211d;
+      --panel-soft: #202923;
+      --line: #ffffff12;
+      --accent: #ee8b42;
+      --accent-light: #ffb16d;
+      --green: #b9ef83;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 85% 0%, #50331e44, transparent 32rem),
+        radial-gradient(ellipse at 0% 70%, #233a2b44, transparent 36rem),
+        #111714;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid var(--accent-light);
+      outline-offset: 3px;
+    }
+
+    .app {
+      width: min(1160px, 100%);
+      margin: 0 auto;
+      padding: 28px 24px 56px;
+    }
+
+    .topbar,
+    .brand,
+    .topbar-note,
+    .eyebrow,
+    .section-heading,
+    .routine-card-top,
+    .routine-meta,
+    .exercise-heading,
+    .exercise-row,
+    .timer-controls,
+    .builder-title,
+    .builder-exercise-row,
+    .form-actions {
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar {
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 42px;
+    }
+
+    .brand {
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      color: #171611;
+      background: var(--accent);
+      border-radius: 15px;
+      font-size: 1.45rem;
+      box-shadow: 0 8px 26px #ee8b4230;
+    }
+
+    .brand-name {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .brand-caption {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .topbar-note {
+      gap: 9px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 14px #b9ef8370;
+    }
+
+    .intro {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      gap: 8px;
+      margin: 0 0 12px;
+      color: var(--accent-light);
+      font-size: 0.75rem;
+      font-weight: 750;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      overflow-wrap: anywhere;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      line-height: 1.02;
+      letter-spacing: -0.055em;
+    }
+
+    .intro-copy {
+      max-width: 580px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(110px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .stat {
+      padding: 16px 18px;
+      background: #1a211dcc;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    .stat-value {
+      margin: 0;
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .stat-label {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.83fr) minmax(0, 1.55fr);
+      align-items: start;
+      gap: 20px;
+    }
+
+    .panel {
+      min-width: 0;
+      padding: 22px;
+      background: linear-gradient(145deg, #1c241f, #171d19);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: 0 16px 48px #00000015;
+    }
+
+    .section-heading {
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 17px;
+    }
+
+    .section-heading h2,
+    .builder-title h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section-kicker {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .filter-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 16px;
+    }
+
+    .filter-button {
+      padding: 7px 11px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.76rem;
+      transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+    }
+
+    .filter-button:hover,
+    .filter-button[aria-pressed="true"] {
+      color: #171611;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .routine-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .routine-card {
+      width: 100%;
+      padding: 15px;
+      text-align: left;
+      background: #ffffff04;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+    }
+
+    .routine-card:hover {
+      background: #ffffff0a;
+      border-color: #ffffff2b;
+      transform: translateY(-1px);
+    }
+
+    .routine-card[aria-pressed="true"] {
+      background: #ee8b4210;
+      border-color: #ee8b4270;
+      box-shadow: inset 3px 0 var(--accent);
+    }
+
+    .routine-card-top {
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .routine-card-name {
+      display: block;
+      margin: 0;
+      font-size: 0.93rem;
+      font-weight: 700;
+    }
+
+    .category-icon {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      place-items: center;
+      background: #ffffff0b;
+      border-radius: 11px;
+      font-size: 1.05rem;
+    }
+
+    .routine-description {
+      display: block;
+      margin: 9px 0 12px;
+      color: var(--muted);
+      font-size: 0.79rem;
+      line-height: 1.45;
+    }
+
+    .routine-meta {
+      gap: 11px;
+      color: #c5ccc4;
+      font-size: 0.72rem;
+    }
+
+    .routine-meta span + span::before {
+      content: "·";
+      margin-right: 11px;
+      color: #748076;
+    }
+
+    .empty-state {
+      padding: 18px 14px;
+      color: var(--muted);
+      background: #ffffff05;
+      border: 1px dashed #ffffff20;
+      border-radius: 14px;
+      font-size: 0.84rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .detail-header h2 {
+      margin: 0;
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+      letter-spacing: -0.04em;
+    }
+
+    .detail-description {
+      max-width: 540px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+
+    .level-badge {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      color: var(--green);
+      background: #b9ef8310;
+      border: 1px solid #b9ef832b;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .progress-wrap {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #ffffff06;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+    }
+
+    .progress-copy {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .progress-copy strong {
+      color: #f3f1e9;
+    }
+
+    .progress-track {
+      height: 7px;
+      overflow: hidden;
+      background: #ffffff12;
+      border-radius: 99px;
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      border-radius: inherit;
+      transition: width 200ms ease;
+    }
+
+    .exercise-heading {
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .exercise-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .exercise-row {
+      gap: 12px;
+      padding: 13px;
+      background: #ffffff04;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      transition: opacity 150ms ease, background 150ms ease;
+    }
+
+    .exercise-row.is-done {
+      background: #b9ef8309;
+      border-color: #b9ef8328;
+    }
+
+    .exercise-check {
+      width: 19px;
+      height: 19px;
+      flex: 0 0 auto;
+      accent-color: var(--green);
+      cursor: pointer;
+    }
+
+    .exercise-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .exercise-copy strong {
+      display: block;
+      font-size: 0.88rem;
+    }
+
+    .exercise-copy span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.4;
+    }
+
+    .exercise-time {
+      flex: 0 0 auto;
+      color: var(--accent-light);
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .timer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 18px;
+      padding: 16px;
+      background: #111714;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+    }
+
+    .timer-label {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 0.73rem;
+    }
+
+    .timer-display {
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 1.65rem;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+    }
+
+    .timer-controls {
+      gap: 8px;
+    }
+
+    .button {
+      min-height: 40px;
+      padding: 9px 13px;
+      border: 1px solid transparent;
+      border-radius: 11px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 750;
+      transition: background 150ms ease, transform 150ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .button-primary {
+      color: #1d1710;
+      background: var(--accent);
+    }
+
+    .button-primary:hover {
+      background: var(--accent-light);
+    }
+
+    .button-secondary {
+      color: #e7e9e3;
+      background: #ffffff0b;
+      border-color: var(--line);
+    }
+
+    .button-secondary:hover {
+      background: #ffffff14;
+    }
+
+    .button-danger {
+      color: #ffb7a8;
+      background: #ed6a4d12;
+      border-color: #ed6a4d30;
+    }
+
+    .button-danger:hover {
+      background: #ed6a4d22;
+    }
+
+    .finish-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .finish-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.4;
+    }
+
+    .button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+      transform: none;
+    }
+
+    .builder {
+      margin-top: 22px;
+    }
+
+    .builder-title {
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 17px;
+    }
+
+    .builder-icon {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      color: var(--accent-light);
+      background: #ee8b4214;
+      border-radius: 11px;
+      font-size: 1.1rem;
+    }
+
+    .routine-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      color: #cbd1c9;
+      font-size: 0.75rem;
+      font-weight: 650;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 11px;
+      color: #f3f1e9;
+      background: #111714;
+      border: 1px solid #ffffff1a;
+      border-radius: 10px;
+    }
+
+    .field input::placeholder {
+      color: #778078;
+    }
+
+    .exercise-builder {
+      padding: 14px;
+      background: #ffffff04;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .exercise-builder h3 {
+      margin: 0 0 11px;
+      font-size: 0.83rem;
+    }
+
+    .builder-exercise-row {
+      align-items: end;
+      gap: 9px;
+    }
+
+    .builder-exercise-row .field:first-child {
+      flex: 1;
+    }
+
+    .builder-exercise-row .field:nth-child(2) {
+      width: 96px;
+    }
+
+    .exercise-add-button {
+      min-height: 42px;
+      padding-inline: 13px;
+    }
+
+    .draft-list {
+      display: grid;
+      gap: 7px;
+      margin: 11px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .draft-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #ffffff07;
+      border-radius: 9px;
+      color: #dfe2dc;
+      font-size: 0.78rem;
+    }
+
+    .draft-item span:last-child {
+      flex: 0 0 auto;
+      color: var(--muted);
+    }
+
+    .draft-empty {
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .form-actions {
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .form-hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 5;
+      max-width: min(420px, calc(100vw - 32px));
+      padding: 13px 16px;
+      color: #171611;
+      background: #d9f0c0;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px #0005;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .toast[hidden] {
+      display: none;
+    }
+
+    @media (max-width: 800px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .routine-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .app {
+        padding: 20px 14px 38px;
+      }
+
+      .topbar {
+        margin-bottom: 32px;
+      }
+
+      .topbar-note {
+        font-size: 0;
+      }
+
+      .intro {
+        display: block;
+      }
+
+      .stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .stat {
+        padding: 13px 11px;
+      }
+
+      .stat-value {
+        font-size: 1.25rem;
+      }
+
+      .stat-label {
+        font-size: 0.68rem;
+      }
+
+      .panel {
+        padding: 17px;
+        border-radius: 18px;
+      }
+
+      .routine-list {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .form-grid .field:first-child {
+        grid-column: 1 / -1;
+      }
+
+      .builder-exercise-row {
+        flex-wrap: wrap;
+      }
+
+      .builder-exercise-row .field:first-child {
+        flex-basis: 100%;
+      }
+
+      .builder-exercise-row .field:nth-child(2) {
+        flex: 1;
+        width: auto;
+      }
+
+      .exercise-add-button {
+        flex: 1;
+      }
+
+      .timer {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .timer-controls {
+        width: 100%;
+      }
+
+      .timer-controls .button {
+        flex: 1;
+      }
+
+      .finish-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .finish-row .button {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Cancha, inicio">
+        <span class="brand-mark" aria-hidden="true">🏀</span>
+        <span>
+          <span class="brand-name">CANCHA</span>
+          <span class="brand-caption">Entrena con intención</span>
+        </span>
+      </a>
+      <div class="topbar-note"><span class="live-dot" aria-hidden="true"></span> Tu próximo nivel empieza hoy</div>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow"><span aria-hidden="true">✳</span> Tu espacio de entrenamiento</p>
+        <h1 id="page-title">Gana tu lugar<br>en la cancha.</h1>
+        <p class="intro-copy">Elige una rutina, completa cada ejercicio y registra tu progreso. También puedes crear un plan propio para entrenar a tu manera.</p>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Resumen de entrenamiento">
+      <article class="stat">
+        <p class="stat-value" id="stat-routines">0</p>
+        <p class="stat-label">rutinas disponibles</p>
+      </article>
+      <article class="stat">
+        <p class="stat-value" id="stat-minutes">0</p>
+        <p class="stat-label">minutos completados</p>
+      </article>
+      <article class="stat">
+        <p class="stat-value" id="stat-sessions">0</p>
+        <p class="stat-label">entrenamientos terminados</p>
+      </article>
+    </section>
+
+    <div class="workspace">
+      <section class="panel" aria-labelledby="library-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="library-title">Tu biblioteca</h2>
+            <p class="section-kicker">Escoge el foco de hoy</p>
+          </div>
+          <span class="builder-icon" aria-hidden="true">▤</span>
+        </div>
+        <div class="filter-list" role="group" aria-label="Filtrar rutinas">
+          <button class="filter-button" type="button" data-filter="todas" aria-pressed="true">Todas</button>
+          <button class="filter-button" type="button" data-filter="tiro" aria-pressed="false">Tiro</button>
+          <button class="filter-button" type="button" data-filter="manejo" aria-pressed="false">Manejo</button>
+          <button class="filter-button" type="button" data-filter="fisico" aria-pressed="false">Físico</button>
+          <button class="filter-button" type="button" data-filter="mixto" aria-pressed="false">Mixto</button>
+        </div>
+        <div class="routine-list" id="routine-list" aria-live="polite"></div>
+      </section>
+
+      <div>
+        <section class="panel" id="routine-detail" aria-live="polite"></section>
+
+        <section class="panel builder" aria-labelledby="builder-heading">
+          <div class="builder-title">
+            <div>
+              <h2 id="builder-heading">Crea tu rutina</h2>
+              <p class="section-kicker">Diseña una sesión con tus propios ejercicios</p>
+            </div>
+            <span class="builder-icon" aria-hidden="true">＋</span>
+          </div>
+          <form class="routine-form" id="routine-form">
+            <div class="form-grid">
+              <div class="field">
+                <label for="routine-name">Nombre de la rutina</label>
+                <input id="routine-name" name="routineName" type="text" maxlength="48" placeholder="Ej. Mi entrenamiento" required>
+              </div>
+              <div class="field">
+                <label for="routine-focus">Enfoque</label>
+                <select id="routine-focus" name="focus">
+                  <option value="tiro">Tiro</option>
+                  <option value="manejo">Manejo</option>
+                  <option value="fisico">Físico</option>
+                  <option value="mixto" selected>Mixto</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="routine-level">Nivel</label>
+                <select id="routine-level" name="level">
+                  <option>Principiante</option>
+                  <option selected>Intermedio</option>
+                  <option>Avanzado</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="exercise-builder">
+              <h3>Añade ejercicios</h3>
+              <div class="builder-exercise-row">
+                <div class="field">
+                  <label for="exercise-name">Ejercicio</label>
+                  <input id="exercise-name" type="text" maxlength="60" placeholder="Ej. Bandejas con ambas manos">
+                </div>
+                <div class="field">
+                  <label for="exercise-minutes">Minutos</label>
+                  <input id="exercise-minutes" type="number" min="1" max="180" value="5">
+                </div>
+                <button class="button button-secondary exercise-add-button" id="add-exercise" type="button">＋ Añadir</button>
+              </div>
+              <ul class="draft-list" id="draft-list"></ul>
+            </div>
+
+            <div class="form-actions">
+              <p class="form-hint">Añade al menos un ejercicio para guardar la rutina.</p>
+              <button class="button button-primary" type="submit">Guardar rutina</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script>
+    "use strict";
+
+    const defaultRoutines = [
+      {
+        id: "tiro-preciso",
+        name: "Tiro preciso",
+        focus: "tiro",
+        level: "Principiante",
+        description: "Construye una mecánica consistente y gana confianza desde distintas zonas.",
+        exercises: [
+          { id: "calentamiento-tiro", name: "Calentamiento y forma de tiro", detail: "Tiros cerca del aro, enfócate en el equilibrio.", minutes: 5 },
+          { id: "tiro-cerca", name: "Tiros de media distancia", detail: "5 posiciones, 8 lanzamientos por posición.", minutes: 10 },
+          { id: "tiros-libres", name: "Tiros libres", detail: "Completa 5 series de 10 tiros con pausa.", minutes: 8 },
+          { id: "tiro-movimiento", name: "Recibir y tirar", detail: "Muévete entre posiciones antes de cada lanzamiento.", minutes: 7 }
+        ]
+      },
+      {
+        id: "control-del-balon",
+        name: "Control del balón",
+        focus: "manejo",
+        level: "Intermedio",
+        description: "Mejora el control, el cambio de ritmo y la protección del balón.",
+        exercises: [
+          { id: "bote-estatico", name: "Bote bajo y alto", detail: "30 segundos por mano, alternando altura y ritmo.", minutes: 5 },
+          { id: "crossover", name: "Cruces en el sitio", detail: "Crossover, entre piernas y por detrás; 3 rondas.", minutes: 7 },
+          { id: "zigzag", name: "Zigzag con cambios", detail: "Recorre la cancha cambiando de dirección en cada cono.", minutes: 8 },
+          { id: "finalizacion", name: "Bote y finalización", detail: "Ataca el aro desde ambos lados, 10 veces por mano.", minutes: 8 }
+        ]
+      },
+      {
+        id: "energia-de-juego",
+        name: "Energía de juego",
+        focus: "fisico",
+        level: "Intermedio",
+        description: "Desarrolla agilidad y resistencia con movimientos propios del juego.",
+        exercises: [
+          { id: "movilidad", name: "Movilidad dinámica", detail: "Activa tobillos, cadera y hombros antes de empezar.", minutes: 5 },
+          { id: "desplazamientos", name: "Desplazamientos defensivos", detail: "4 recorridos laterales manteniendo una postura baja.", minutes: 8 },
+          { id: "sprints", name: "Sprints de cancha", detail: "6 carreras de ida y vuelta con descanso breve.", minutes: 8 },
+          { id: "saltos", name: "Saltos y aterrizajes", detail: "3 series de 8 saltos, aterriza con control.", minutes: 6 }
+        ]
+      },
+      {
+        id: "sesion-completa",
+        name: "Sesión completa",
+        focus: "mixto",
+        level: "Avanzado",
+        description: "Una sesión equilibrada de manejo, finalización y tiro bajo presión.",
+        exercises: [
+          { id: "entrada-calor", name: "Activación con balón", detail: "Bote en movimiento y cambios de mano suaves.", minutes: 5 },
+          { id: "manejo-presion", name: "Manejo con cambios de ritmo", detail: "Alterna aceleración, frenada y cambio de dirección.", minutes: 8 },
+          { id: "bandejas", name: "Bandejas con ambas manos", detail: "10 finalizaciones por lado, usa ambas manos.", minutes: 8 },
+          { id: "tiros-5-zonas", name: "Tiro en 5 zonas", detail: "Anota 5 tiros en cada posición antes de avanzar.", minutes: 12 },
+          { id: "tiro-fatiga", name: "Tiro después del esfuerzo", detail: "Sprint corto seguido de 2 tiros; repite 6 veces.", minutes: 7 }
+        ]
+      }
+    ];
+
+    const focusLabels = { tiro: "Tiro", manejo: "Manejo", fisico: "Físico", mixto: "Mixto" };
+    const focusIcons = { tiro: "🎯", manejo: "🏀", fisico: "⚡", mixto: "🏆" };
+    const storageKey = "cancha-rutinas-v1";
+    const savedState = loadState();
+    let customRoutines = savedState.customRoutines;
+    let completedExercises = savedState.completedExercises;
+    let finishedSessions = savedState.finishedSessions;
+    let activeRoutineId = "tiro-preciso";
+    let activeFilter = "todas";
+    let draftExercises = [];
+    let elapsedSeconds = 0;
+    let timerInterval = null;
+    let toastTimeout = null;
+
+    const routineList = document.getElementById("routine-list");
+    const routineDetail = document.getElementById("routine-detail");
+    const draftList = document.getElementById("draft-list");
+    const toast = document.getElementById("toast");
+
+    function loadState() {
+      const emptyState = { customRoutines: [], completedExercises: {}, finishedSessions: 0 };
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return emptyState;
+        const parsed = JSON.parse(raw);
+        return {
+          customRoutines: Array.isArray(parsed.customRoutines) ? parsed.customRoutines : [],
+          completedExercises: parsed.completedExercises && typeof parsed.completedExercises === "object"
+            ? parsed.completedExercises
+            : {},
+          finishedSessions: Number.isInteger(parsed.finishedSessions) && parsed.finishedSessions >= 0
+            ? parsed.finishedSessions
+            : 0
+        };
+      } catch (error) {
+        window.setTimeout(() => showToast("No se pudieron cargar los datos guardados de este navegador."), 0);
+        return emptyState;
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({
+          customRoutines,
+          completedExercises,
+          finishedSessions
+        }));
+        return true;
+      } catch (error) {
+        showToast("No se pudieron guardar los cambios. Revisa el almacenamiento del navegador.");
+        return false;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    function getRoutines() {
+      return [...defaultRoutines, ...customRoutines];
+    }
+
+    function getRoutine(id) {
+      return getRoutines().find(routine => routine.id === id) || defaultRoutines[0];
+    }
+
+    function getCheckedIds(routineId) {
+      return Array.isArray(completedExercises[routineId]) ? completedExercises[routineId] : [];
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.hidden = false;
+      window.clearTimeout(toastTimeout);
+      toastTimeout = window.setTimeout(() => {
+        toast.hidden = true;
+      }, 3200);
+    }
+
+    function getRoutineMinutes(routine) {
+      return routine.exercises.reduce((total, exercise) => total + (Number(exercise.minutes) || 0), 0);
+    }
+
+    function updateStats() {
+      const routines = getRoutines();
+      const completedMinutes = routines.reduce((total, routine) => {
+        const checked = new Set(getCheckedIds(routine.id));
+        return total + routine.exercises.reduce((minutes, exercise) => {
+          return minutes + (checked.has(exercise.id) ? Number(exercise.minutes) || 0 : 0);
+        }, 0);
+      }, 0);
+      document.getElementById("stat-routines").textContent = routines.length;
+      document.getElementById("stat-minutes").textContent = completedMinutes;
+      document.getElementById("stat-sessions").textContent = finishedSessions;
+    }
+
+    function renderRoutineList() {
+      const visibleRoutines = getRoutines().filter(routine => {
+        return activeFilter === "todas" || routine.focus === activeFilter;
+      });
+
+      document.querySelectorAll("[data-filter]").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.filter === activeFilter));
+      });
+
+      if (visibleRoutines.length === 0) {
+        routineList.innerHTML = '<p class="empty-state">Todavía no tienes rutinas en esta categoría. Crea una abajo para empezar.</p>';
+        return;
+      }
+
+      routineList.innerHTML = visibleRoutines.map(routine => {
+        const checkedCount = getCheckedIds(routine.id).length;
+        const exerciseCount = routine.exercises.length;
+        return `
+          <button class="routine-card" type="button" data-routine-id="${escapeHtml(routine.id)}" aria-pressed="${routine.id === activeRoutineId}">
+            <span class="routine-card-top">
+              <span class="routine-card-name">${escapeHtml(routine.name)}</span>
+              <span class="category-icon" aria-hidden="true">${focusIcons[routine.focus] || focusIcons.mixto}</span>
+            </span>
+            <span class="routine-description">${escapeHtml(routine.description)}</span>
+            <span class="routine-meta">
+              <span>${getRoutineMinutes(routine)} min</span>
+              <span>${exerciseCount} ejercicios</span>
+              ${checkedCount ? `<span>${checkedCount}/${exerciseCount} hechos</span>` : ""}
+            </span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderRoutineDetail() {
+      const routine = getRoutine(activeRoutineId);
+      const checkedIds = new Set(getCheckedIds(routine.id));
+      const total = routine.exercises.length;
+      const doneCount = routine.exercises.filter(exercise => checkedIds.has(exercise.id)).length;
+      const progress = total ? Math.round((doneCount / total) * 100) : 0;
+      const isCustom = customRoutines.some(item => item.id === routine.id);
+
+      routineDetail.innerHTML = `
+        <div class="detail-header">
+          <div>
+            <p class="eyebrow">${focusIcons[routine.focus] || focusIcons.mixto} ${escapeHtml(focusLabels[routine.focus] || "Mixto")}</p>
+            <h2>${escapeHtml(routine.name)}</h2>
+            <p class="detail-description">${escapeHtml(routine.description)}</p>
+          </div>
+          <span class="level-badge">${escapeHtml(routine.level)}</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-copy">
+            <span>Progreso de la rutina</span>
+            <strong>${doneCount} de ${total} ejercicios · ${progress}%</strong>
+          </div>
+          <div class="progress-track" role="progressbar" aria-label="Progreso de la rutina" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}">
+            <div class="progress-fill" style="width: ${progress}%"></div>
+          </div>
+        </div>
+        <div class="exercise-heading"><span>Ejercicios</span><span>${getRoutineMinutes(routine)} min en total</span></div>
+        <div class="exercise-list">
+          ${routine.exercises.map(exercise => {
+            const isDone = checkedIds.has(exercise.id);
+            return `
+              <label class="exercise-row${isDone ? " is-done" : ""}">
+                <input class="exercise-check" type="checkbox" data-exercise-id="${escapeHtml(exercise.id)}" ${isDone ? "checked" : ""} aria-label="Marcar ${escapeHtml(exercise.name)} como completado">
+                <span class="exercise-copy">
+                  <strong>${escapeHtml(exercise.name)}</strong>
+                  <span>${escapeHtml(exercise.detail || "Completa el ejercicio a tu ritmo.")}</span>
+                </span>
+                <span class="exercise-time">${Number(exercise.minutes) || 0} min</span>
+              </label>
+            `;
+          }).join("")}
+        </div>
+        <div class="timer">
+          <div>
+            <p class="timer-label">Cronómetro de entrenamiento</p>
+            <p class="timer-display" id="timer-display" aria-live="off">${formatTime(elapsedSeconds)}</p>
+          </div>
+          <div class="timer-controls">
+            <button class="button button-primary" type="button" id="timer-toggle">${timerInterval ? "Pausar" : "Iniciar"}</button>
+            <button class="button button-secondary" type="button" id="timer-reset">Reiniciar</button>
+          </div>
+        </div>
+        <div class="finish-row">
+          <p class="finish-note">${doneCount === total ? "¡Buen trabajo! Has completado todos los ejercicios." : "Marca los ejercicios para registrar tu avance."}</p>
+          <button class="button button-primary" type="button" id="finish-session" ${doneCount !== total ? "disabled" : ""}>Terminar entrenamiento</button>
+        </div>
+        ${isCustom ? `<div class="finish-row"><p class="finish-note">Rutina creada por ti</p><button class="button button-danger" type="button" id="delete-routine">Eliminar rutina</button></div>` : ""}
+      `;
+
+      routineList.querySelectorAll("[data-routine-id]").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.routineId === routine.id));
+      });
+    }
+
+    function renderDraft() {
+      if (draftExercises.length === 0) {
+        draftList.innerHTML = '<li class="draft-empty">Aún no has añadido ejercicios.</li>';
+        return;
+      }
+
+      draftList.innerHTML = draftExercises.map((exercise, index) => `
+        <li class="draft-item">
+          <span>${escapeHtml(exercise.name)}</span>
+          <span>${exercise.minutes} min <button class="button button-danger" type="button" data-remove-draft="${index}" aria-label="Quitar ${escapeHtml(exercise.name)}" style="min-height:28px; padding:4px 8px; margin-left:7px;">Quitar</button></span>
+        </li>
+      `).join("");
+    }
+
+    function render() {
+      updateStats();
+      renderRoutineList();
+      renderRoutineDetail();
+      renderDraft();
+    }
+
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
+      const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
+      return `${minutes}:${remainingSeconds}`;
+    }
+
+    function stopTimer() {
+      if (timerInterval !== null) {
+        window.clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    function resetTimer() {
+      stopTimer();
+      elapsedSeconds = 0;
+      renderRoutineDetail();
+      renderRoutineList();
+    }
+
+    function addDraftExercise() {
+      const nameInput = document.getElementById("exercise-name");
+      const minutesInput = document.getElementById("exercise-minutes");
+      const name = nameInput.value.trim();
+      const minutes = Number(minutesInput.value);
+
+      if (!name) {
+        nameInput.focus();
+        showToast("Escribe el nombre del ejercicio antes de añadirlo.");
+        return;
+      }
+      if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180) {
+        minutesInput.focus();
+        showToast("Indica una duración entre 1 y 180 minutos.");
+        return;
+      }
+
+      draftExercises.push({
+        id: `custom-exercise-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name,
+        detail: `${minutes} minutos de práctica.`,
+        minutes
+      });
+      nameInput.value = "";
+      nameInput.focus();
+      renderDraft();
+    }
+
+    document.querySelector(".filter-list").addEventListener("click", event => {
+      const button = event.target.closest("[data-filter]");
+      if (!button) return;
+      activeFilter = button.dataset.filter;
+      renderRoutineList();
+    });
+
+    routineList.addEventListener("click", event => {
+      const button = event.target.closest("[data-routine-id]");
+      if (!button || button.dataset.routineId === activeRoutineId) return;
+      activeRoutineId = button.dataset.routineId;
+      stopTimer();
+      elapsedSeconds = 0;
+      renderRoutineList();
+      renderRoutineDetail();
+    });
+
+    routineDetail.addEventListener("change", event => {
+      const checkbox = event.target.closest("[data-exercise-id]");
+      if (!checkbox) return;
+      const routine = getRoutine(activeRoutineId);
+      const checked = new Set(getCheckedIds(routine.id));
+      if (checkbox.checked) {
+        checked.add(checkbox.dataset.exerciseId);
+      } else {
+        checked.delete(checkbox.dataset.exerciseId);
+      }
+      completedExercises[routine.id] = [...checked];
+      saveState();
+      render();
+    });
+
+    routineDetail.addEventListener("click", event => {
+      if (event.target.closest("#timer-toggle")) {
+        if (timerInterval !== null) {
+          stopTimer();
+        } else {
+          timerInterval = window.setInterval(() => {
+            elapsedSeconds += 1;
+            const display = document.getElementById("timer-display");
+            if (display) display.textContent = formatTime(elapsedSeconds);
+          }, 1000);
+        }
+        renderRoutineDetail();
+      }
+
+      if (event.target.closest("#timer-reset")) {
+        resetTimer();
+      }
+
+      if (event.target.closest("#finish-session")) {
+        const routine = getRoutine(activeRoutineId);
+        if (getCheckedIds(routine.id).length !== routine.exercises.length) return;
+        finishedSessions += 1;
+        completedExercises[routine.id] = [];
+        resetTimer();
+        saveState();
+        render();
+        showToast("¡Entrenamiento completado! Buen trabajo.");
+      }
+
+      if (event.target.closest("#delete-routine")) {
+        const routine = getRoutine(activeRoutineId);
+        customRoutines = customRoutines.filter(item => item.id !== routine.id);
+        delete completedExercises[routine.id];
+        activeRoutineId = "tiro-preciso";
+        stopTimer();
+        elapsedSeconds = 0;
+        saveState();
+        render();
+        showToast("Rutina eliminada.");
+      }
+    });
+
+    document.getElementById("add-exercise").addEventListener("click", addDraftExercise);
+
+    document.getElementById("exercise-name").addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        addDraftExercise();
+      }
+    });
+
+    draftList.addEventListener("click", event => {
+      const button = event.target.closest("[data-remove-draft]");
+      if (!button) return;
+      draftExercises.splice(Number(button.dataset.removeDraft), 1);
+      renderDraft();
+    });
+
+    document.getElementById("routine-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const nameInput = document.getElementById("routine-name");
+      const name = nameInput.value.trim();
+      if (!name) {
+        nameInput.focus();
+        showToast("Escribe un nombre para tu rutina.");
+        return;
+      }
+      if (draftExercises.length === 0) {
+        document.getElementById("exercise-name").focus();
+        showToast("Añade al menos un ejercicio antes de guardar.");
+        return;
+      }
+
+      const routine = {
+        id: `custom-routine-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name,
+        focus: document.getElementById("routine-focus").value,
+        level: document.getElementById("routine-level").value,
+        description: `Rutina personal de ${focusLabels[document.getElementById("routine-focus").value].toLowerCase()} con ${draftExercises.length} ejercicios.`,
+        exercises: [...draftExercises]
+      };
+      customRoutines.push(routine);
+      activeRoutineId = routine.id;
+      activeFilter = "todas";
+      document.getElementById("routine-form").reset();
+      draftExercises = [];
+      stopTimer();
+      elapsedSeconds = 0;
+      saveState();
+      render();
+      showToast("Tu rutina quedó guardada en este navegador.");
+      routineDetail.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+
+    render();
+  </script>
+</body>
+</html>

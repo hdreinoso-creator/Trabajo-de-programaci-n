@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cronómetro</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #10131c;
+      color: #f4f6ff;
+      --accent: #9eb5ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: grid;
+      min-height: 100vh;
+      margin: 0;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(ellipse at 50% 35%, #242b43 0, #10131c 65%);
+    }
+
+    main {
+      width: min(100%, 620px);
+      padding: 40px 32px;
+      text-align: center;
+      background: #191e2c;
+      border: 1px solid #30384d;
+      border-radius: 24px;
+      box-shadow: 0 24px 80px #0006;
+    }
+
+    h1 {
+      margin: 0 0 32px;
+      color: #b8c3df;
+      font-size: 1rem;
+      font-weight: 650;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    #display {
+      margin: 0 0 30px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: clamp(2.5rem, 10vw, 4.5rem);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    button {
+      min-width: 128px;
+      padding: 12px 20px;
+      color: #f4f6ff;
+      font: inherit;
+      font-weight: 650;
+      background: #30384d;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 150ms ease, transform 150ms ease;
+    }
+
+    button:hover:not(:disabled) {
+      background: #414c68;
+      transform: translateY(-1px);
+    }
+
+    button:focus-visible {
+      outline: 3px solid #9eb5ff;
+      outline-offset: 3px;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    #toggle {
+      color: #10131c;
+      background: var(--accent);
+    }
+
+    #toggle:hover:not(:disabled) {
+      background: #b5c6ff;
+    }
+
+    #lap {
+      color: #10131c;
+      background: #65e6c1;
+    }
+
+    #lap:hover:not(:disabled) {
+      background: #91f1d5;
+    }
+
+    #status {
+      min-height: 1.5em;
+      margin: 20px 0 0;
+      color: #b8c3df;
+    }
+
+    .hint {
+      margin: 8px 0 0;
+      color: #8993aa;
+      font-size: 0.875rem;
+    }
+
+    .laps {
+      margin-top: 32px;
+      text-align: left;
+      border-top: 1px solid #30384d;
+    }
+
+    .laps-heading,
+    .lap-row {
+      display: grid;
+      grid-template-columns: minmax(100px, 1fr) minmax(100px, 1fr) minmax(100px, 1fr);
+      align-items: center;
+      gap: 12px;
+    }
+
+    .laps-heading {
+      padding: 16px 12px 10px;
+      color: #8993aa;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    #lap-list {
+      display: grid;
+      gap: 8px;
+      max-height: 260px;
+      margin: 0;
+      padding: 0 4px 4px 0;
+      overflow-y: auto;
+      list-style: none;
+    }
+
+    .lap-row {
+      --lap-color: #9eb5ff;
+      padding: 12px;
+      color: var(--lap-color);
+      background: color-mix(in srgb, var(--lap-color) 10%, #191e2c);
+      border-left: 3px solid var(--lap-color);
+      border-radius: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .lap-number {
+      font-weight: 700;
+    }
+
+    .lap-time,
+    .lap-split {
+      text-align: right;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .empty-state {
+      margin: 0;
+      padding: 14px 12px;
+      color: #8993aa;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 480px) {
+      main {
+        padding: 32px 20px;
+      }
+
+      .controls button {
+        min-width: 0;
+        flex: 1 1 40%;
+      }
+
+      .laps-heading,
+      .lap-row {
+        grid-template-columns: minmax(70px, 1fr) minmax(95px, 1fr) minmax(95px, 1fr);
+        gap: 8px;
+        padding-right: 8px;
+        padding-left: 8px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Cronómetro</h1>
+    <p id="display" role="timer" aria-label="Tiempo transcurrido">00:00:00.00</p>
+    <div class="controls">
+      <button id="toggle" type="button">Iniciar</button>
+      <button id="lap" type="button" disabled>Tomar tiempo</button>
+      <button id="reset" type="button">Reiniciar</button>
+      <button id="finish" type="button">Finalizar</button>
+    </div>
+    <p id="status" aria-live="polite">En pausa</p>
+    <p class="hint">Espacio: iniciar/pausar · L: tomar tiempo · R: reiniciar · Q: finalizar</p>
+    <section class="laps" aria-labelledby="laps-title">
+      <div class="laps-heading" id="laps-title">
+        <span>Toma</span>
+        <span style="text-align: right">Tiempo total</span>
+        <span style="text-align: right">Intervalo</span>
+      </div>
+      <ol id="lap-list" aria-live="polite">
+        <li class="empty-state">Inicia el cronómetro y registra tu primera toma.</li>
+      </ol>
+    </section>
+  </main>
+
+  <script>
+    const display = document.querySelector("#display");
+    const toggleButton = document.querySelector("#toggle");
+    const resetButton = document.querySelector("#reset");
+    const finishButton = document.querySelector("#finish");
+    const lapButton = document.querySelector("#lap");
+    const lapList = document.querySelector("#lap-list");
+    const status = document.querySelector("#status");
+    const lapColors = ["#65e6c1", "#ffb86b", "#c49bff", "#ff7b9c", "#7dd3fc", "#f5df66"];
+
+    let accumulatedMilliseconds = 0;
+    let startedAt = 0;
+    let running = false;
+    let finished = false;
+    let laps = [];
+
+    function elapsedMilliseconds() {
+      return accumulatedMilliseconds + (running ? performance.now() - startedAt : 0);
+    }
+
+    function formatTime(milliseconds) {
+      const hundredths = Math.floor(milliseconds / 10);
+      const hours = Math.floor(hundredths / 360000);
+      const minutes = Math.floor(hundredths / 6000) % 60;
+      const seconds = Math.floor(hundredths / 100) % 60;
+      const fraction = hundredths % 100;
+
+      return [hours, minutes, seconds]
+        .map((part) => String(part).padStart(2, "0"))
+        .join(":") + `.${String(fraction).padStart(2, "0")}`;
+    }
+
+    function render() {
+      display.textContent = formatTime(elapsedMilliseconds());
+      toggleButton.textContent = running ? "Pausar" : "Iniciar";
+      toggleButton.disabled = finished;
+      lapButton.disabled = !running;
+      finishButton.disabled = finished;
+      status.textContent = finished ? "Cronómetro finalizado" : running ? "En marcha" : "En pausa";
+    }
+
+    function toggle() {
+      if (finished) return;
+
+      if (running) {
+        accumulatedMilliseconds = elapsedMilliseconds();
+        running = false;
+      } else {
+        startedAt = performance.now();
+        running = true;
+      }
+
+      render();
+    }
+
+    function reset() {
+      accumulatedMilliseconds = 0;
+      running = false;
+      finished = false;
+      startedAt = 0;
+      laps = [];
+      renderLaps();
+      render();
+    }
+
+    function recordLap() {
+      if (!running) return;
+
+      const totalMilliseconds = elapsedMilliseconds();
+      const previousTotal = laps.length > 0 ? laps[laps.length - 1].totalMilliseconds : 0;
+      laps.push({
+        totalMilliseconds,
+        splitMilliseconds: totalMilliseconds - previousTotal
+      });
+      renderLaps();
+    }
+
+    function renderLaps() {
+      lapList.replaceChildren();
+
+      if (laps.length === 0) {
+        const emptyState = document.createElement("li");
+        emptyState.className = "empty-state";
+        emptyState.textContent = "Inicia el cronómetro y registra tu primera toma.";
+        lapList.append(emptyState);
+        return;
+      }
+
+      [...laps].reverse().forEach((lap, reverseIndex) => {
+        const lapIndex = laps.length - reverseIndex;
+        const row = document.createElement("li");
+        row.className = "lap-row";
+        row.style.setProperty("--lap-color", lapColors[(lapIndex - 1) % lapColors.length]);
+        const number = document.createElement("span");
+        number.className = "lap-number";
+        number.textContent = `Toma ${lapIndex}`;
+        const total = document.createElement("span");
+        total.className = "lap-time";
+        total.textContent = formatTime(lap.totalMilliseconds);
+        const split = document.createElement("span");
+        split.className = "lap-split";
+        split.textContent = formatTime(lap.splitMilliseconds);
+        row.append(number, total, split);
+        lapList.append(row);
+      });
+    }
+
+    function finish() {
+      if (running) accumulatedMilliseconds = elapsedMilliseconds();
+      running = false;
+      finished = true;
+      render();
+    }
+
+    toggleButton.addEventListener("click", toggle);
+    resetButton.addEventListener("click", reset);
+    lapButton.addEventListener("click", recordLap);
+    finishButton.addEventListener("click", finish);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
+
+      if (event.code === "Space") {
+        event.preventDefault();
+        toggle();
+      } else if (event.key.toLowerCase() === "l") {
+        recordLap();
+      } else if (event.key.toLowerCase() === "r") {
+        reset();
+      } else if (event.key.toLowerCase() === "q") {
+        finish();
+      }
+    });
+
+    window.setInterval(render, 10);
+    renderLaps();
+    render();
+  </script>
+</body>
+</html>
